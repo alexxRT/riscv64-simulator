@@ -20,7 +20,7 @@ class Heart {
         }
 
         EXECUTE_STATUS simulate() {
-            EXECUTE_STATUS status;
+            EXECUTE_STATUS status = EXECUTE_STATUS::SUCCESS;
             // execute
             for (auto& instr : exec_instructions) {
                 Instruction* decoded = decode(instr);
@@ -57,9 +57,14 @@ class Heart {
             }
         }
 
+        void clear_instructions() {
+            exec_instructions.clear();
+            return;
+        }
+
         reg_t pc;
         std::vector<reg_t> registers;
-        std::map<uint16_t, function_t> functions;
+        std::map<uint32_t, function_t> functions;
         std::vector<int> exec_instructions;
 };
 

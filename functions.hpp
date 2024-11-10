@@ -9,41 +9,42 @@
 
 const int REGISTER_SIZE = 64;
 
-
 // TODO fill correct values
 enum class OpFunctionCodes : uint16_t {
-    ADD  = 0x0000,
-    SLT  = 0x0001,
-    SLTU = 0x0002,
-    AND  = 0x0003,
-    OR   = 0x0004,
-    XOR  = 0x0005,
-    SLL  = 0x0006,
-    SRL  = 0x0007,
-    SUB  = 0x0100,
-    SRA  = 0x0101
+    ADD  = 0b0000000000,
+    SLT  = 0b0000000010,
+    SLTU = 0b0000000011,
+    AND  = 0b0000000111,
+    OR   = 0b0000000110,
+    XOR  = 0b0000000100,
+    SLL  = 0b0000000001,
+    SRL  = 0b0000000101,
+    SUB  = 0b0100000000,
+    SRA  = 0b0100000101
 };
 
 
 enum class OpImmFunctionCodes : uint16_t {
-    ADDI  = 0x0000,
-    SLTI  = 0x0001,
-    SLTIU = 0x0002,
-    ANDI  = 0x0003,
-    ORI   = 0x0004,
-    XORI  = 0x0005,
-    SLLI  = 0x0006,
-    SRLI  = 0x0007,
-    SRAI  = 0x0100
+    ADDI  = 0b00000000000,
+    SLTI  = 0b00000000010,
+    SLTIU = 0b00000000011,
+    ANDI  = 0b00000000111,
+    ORI   = 0b00000000110,
+    XORI  = 0b00000000100,
+    SLLI  = 0b00000000001,
+    SRLI  = 0b00000000101,
+    // problem: same func3 value -> differ by imm[30] bit
+    // SRAI  = 0b00000000101
 };
 
+
 enum class BranchFunctionCodes : uint16_t {
-    BEQ  = 0x0000,
-    BNE  = 0x0001,
-    BLT  = 0x0002,
-    BLTU = 0x0003,
-    BGE  = 0x0004,
-    BGEU = 0x0005
+    BEQ  = 0b000,
+    BNE  = 0b001,
+    BLT  = 0b100,
+    BLTU = 0b110,
+    BGE  = 0b101,
+    BGEU = 0b111
 };
 
 struct store_function {
@@ -92,11 +93,14 @@ void ORI(Heart* heart, uint64_t rs1, uint64_t imm, uint64_t rd, uint64_t opt);
 
 void XORI(Heart* heart, uint64_t rs1, uint64_t imm, uint64_t rd, uint64_t opt);
 
+// implemented incorectly, now they shift on full imm, but need only imm[4:0]
 void SLLI(Heart* heart, uint64_t rs1, uint64_t imm, uint64_t rd, uint64_t opt);
 
+// implemented incorectly, now they shift on full imm, but need only imm[4:0]
 void SRLI(Heart* heart, uint64_t rs1, uint64_t imm, uint64_t rd, uint64_t opt);
 
-void SRAI(Heart* heart, uint64_t rs1, uint64_t imm, uint64_t rd, uint64_t opt);
+// ISSUE: have same function code as SRLI, differs by imm[30] only
+// void SRAI(Heart* heart, uint64_t rs1, uint64_t imm, uint64_t rd, uint64_t opt);
 
 
 // lui instruction
