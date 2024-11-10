@@ -10,13 +10,7 @@ class Heart;
 
 typedef std::bitset<64> reg_t;
 typedef std::function<void (Heart*, const uint64_t, const uint64_t, const uint64_t, const uint64_t)> function_t;
-
 typedef std::bitset<32> bits_t;
-typedef std::bitset<5>  argument_t;
-typedef std::bitset<3>  funcode_t;
-typedef std::bitset<10> funcode_ext_t;
-typedef std::bitset<12> imm_short_t;
-typedef std::bitset<20> imm_long_t;
 
 //TO DO opcodes should be changed to correct values
 enum class InstrOpCode : uint8_t {
