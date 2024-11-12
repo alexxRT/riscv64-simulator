@@ -27,7 +27,7 @@ typedef uint8_t regIDT;
 class Instruction {
 public:
     typedef std::function<void (Heart*, const Instruction&)> executorT;
-    Instruction(instT code);
+    Instruction(instT code, executorT execute_) : execute(execute_) {}
 
     instT instr_code;
     regIDT rs1, rs2, rd;
@@ -39,14 +39,14 @@ public:
 
 class InstructionR : public Instruction {
 public:
-    InstructionR(instT code) : Instruction(code) {
+    InstructionR(instT code, executorT execute_) : Instruction(code, execute_) {
         RS1_INIT RS2_INIT RD_INIT
     }
 };
 
 class InstructionI : public Instruction {
 public:
-    InstructionI(instT code) : Instruction(code) {
+    InstructionI(instT code, executorT execute_) : Instruction(code, execute_) {
         RS1_INIT RD_INIT SIGN_INIT
         imm = ((code&INSN_FIELD_IMM12) >> 20) | sign;
     }
@@ -54,7 +54,7 @@ public:
 
 class InstructionS : public Instruction {
 public:
-    InstructionS(instT code) : Instruction(code) {
+    InstructionS(instT code, executorT execute_) : Instruction(code, execute_) {
         RS1_INIT RS2_INIT SIGN_INIT
         imm = ((code&INSN_FIELD_IMM12HI) >> 20)
             | ((code&INSN_FIELD_IMM12LO) >> 7)
@@ -64,7 +64,7 @@ public:
 
 class InstructionB : public Instruction {
 public:
-    InstructionB(instT code) : Instruction(code) {
+    InstructionB(instT code, executorT execute_) : Instruction(code, execute_) {
         RS1_INIT RS2_INIT SIGN_INIT
         imm = ((code & (1<<7)) << 4)
             | ((code & 0x7e000000) >> 20)
@@ -75,7 +75,7 @@ public:
 
 class InstructionU : public Instruction {
 public:
-    InstructionU(instT code) : Instruction(code) {
+    InstructionU(instT code, executorT execute_) : Instruction(code, execute_) {
         RD_INIT
         imm = (code & INSN_FIELD_IMM20);
     }
@@ -83,13 +83,25 @@ public:
 
 class InstructionJ : public Instruction {
 public:
-    InstructionJ(instT code) : Instruction(code) {
+    InstructionJ(instT code, executorT execute_) : Instruction(code, execute_) {
         SIGN_INIT
         imm = ((code & INSN_FIELD_ZIMM10) >> 20)
             | ((code & (1<<20)) >> 9)
             | ((code & (0xff000)))
-            | sign
+            | sign;
     }
+};
+
+namespace Executors {
+void empty_executor(Heart *heart, const Instruction &instr); // example
+
+
+#define _INSTR_(name, type, code) \
+void exec_##name(Heart *heart, const Instruction &instr);
+
+#include "instrs.h"
+#undef _INSTR_
+
 };
 
 #endif

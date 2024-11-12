@@ -44,29 +44,11 @@ class Heart {
         Instruction* decode(uint32_t instruction) {
             uint32_t fingerprint = instruction & mask[instruction & 128];
             switch (fingerprint) {
-            #define _INSTR_(name) case MATCH_##name: return new Instruction##name(instruction);
+            #define _INSTR_(name, type, code) case MATCH_##name: return new Instruction##type(instruction, Executors::exec_##name);
             #include "instrs.h"
             #undef _INSTR_
             }
-            Instruction base(instruction);
-            switch (base.op_code) {
-                case InstrOpCode::OP:
-                    return new InstructionR(instruction);
-                case InstrOpCode::OP_IMM:
-                    return new InstructionI(instruction);
-                case InstrOpCode::BRANCH:
-                    return new InstructionB(instruction);
-                case InstrOpCode::LUI:
-                    return new InstructionU(instruction);
-                case InstrOpCode::JAL:
-                    return new InstructionJ(instruction);
-                case InstrOpCode::JALR:
-                    return new InstructionU(instruction);
-                case InstrOpCode::AUIPC:
-                    return new InstructionU(instruction);
-                default:
-                    return nullptr;
-            }
+            return nullptr;
         }
 };
 
