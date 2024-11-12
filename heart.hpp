@@ -2,7 +2,6 @@
 #define HEART_H
 
 #include "instruction.hpp"
-#include "functions.hpp"
 #include "mask.h"
 
 #include <cstdint>
@@ -19,7 +18,7 @@ class Heart {
     public:
         uint32_t pc;
         uint32_t new_pc;
-        std::array<reg_t, REGISTERS_NUM> registers;
+        std::array<regT, REGISTERS_NUM> registers;
         uint8_t *memory;
 
         Heart() : registers({}), pc(0), memory(nullptr) { }
@@ -33,7 +32,7 @@ class Heart {
                 if (!decoded)
                     return EXECUTE_STATUS::BAD_ADDRES;
 
-                decoded->execute(this);
+                decoded->execute(this, *decoded);
 
                 pc = new_pc;
                 if (status != EXECUTE_STATUS::SUCCESS)

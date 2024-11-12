@@ -6,13 +6,6 @@ Instruction::Instruction(const bits_t& code) {
     instr_code = code;
     op_code = static_cast<InstrOpCode>((code & opcode_mask).to_ullong());
 };
-void Instruction::build_functions_map(std::map<uint32_t, function_t>& functions) {
-    uint32_t key = 0;
-    for (auto& fun : implemented_functions) {
-        key = get_key_val(fun.func_code, fun.op_code);
-        functions.insert({key, fun.executor});
-    }
-}
 bits_t Instruction::opcode_mask = 0x0000007F;
 
 uint32_t Instruction::get_key_val(uint16_t func_code, InstrOpCode op_code) {
