@@ -3,8 +3,9 @@
 
 #include "instruction.hpp"
 #include "functions.hpp"
-#include <vector>
-#include <map>
+
+#include <cstdint>
+#include <array>
 
 const int REGISTERS_NUM = 32;
 
@@ -15,20 +16,25 @@ enum class EXECUTE_STATUS : int {
 
 class Heart {
     public:
-        Heart() : registers(REGISTERS_NUM), pc(0) {
-            Instruction::build_functions_map(functions);
-        }
+        uint32_t pc;
+        uint32_t new_pc;
+        std::array<reg_t, REGISTERS_NUM> registers;
+        uint8_t *memory;
+
+        Heart() : registers({}), pc(0), memory(nullptr) { }
 
         EXECUTE_STATUS simulate() {
             EXECUTE_STATUS status = EXECUTE_STATUS::SUCCESS;
             // execute
-            for (auto& instr : exec_instructions) {
-                Instruction* decoded = decode(instr);
+            while (true) {
+                Instruction* decoded = decode(*(uint32_t*)(memory+pc));
+                new_pc = pc + 4;
                 if (!decoded)
                     return EXECUTE_STATUS::BAD_ADDRES;
 
                 decoded->execute(this);
 
+                pc = new_pc;
                 if (status != EXECUTE_STATUS::SUCCESS)
                     return status;
             }
@@ -56,16 +62,6 @@ class Heart {
                     return nullptr;
             }
         }
-
-        void clear_instructions() {
-            exec_instructions.clear();
-            return;
-        }
-
-        reg_t pc;
-        std::vector<reg_t> registers;
-        std::map<uint32_t, function_t> functions;
-        std::vector<int> exec_instructions;
 };
 
 #endif //HEART_H
