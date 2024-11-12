@@ -1,4 +1,5 @@
 #include "instruction.hpp"
+#include "heart.hpp"
 
 namespace Executors {
 void empty_executor(Heart *heart, const Instruction &instr) {} // example

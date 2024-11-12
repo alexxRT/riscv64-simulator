@@ -1,12 +1,22 @@
 #include "encoding.out.h"
 // #define _INSTR_(name, type, code)
 
-_INSTR_(SLTI, I, {})
-_INSTR_(SLTIU, I, {})
-_INSTR_(ADDI, I, {})
-_INSTR_(ANDI, I, {})
-_INSTR_(ORI, I, {})
-_INSTR_(XORI, I, {})
+#define RS1 (instr.rs1)
+#define RS2 (instr.rs2)
+#define RD (instr.rd)
+#define IMM (instr.imm)
+#define REG(reg) (heart->get_reg(reg))
+#define SET_REG(reg, val) (heart->set_reg(reg, val))
+
+#define CODE_BIN_IU(op) SET_REG(RD, REG(RS1) op IMM);
+#define CODE_BIN_IS(op) SET_REG(RD, ((int64_t)REG(RS1)) op ((int64_t)IMM));
+
+_INSTR_(SLTI, I, {CODE_BIN_IS(<)})
+_INSTR_(SLTIU, I, {CODE_BIN_IU(<)})
+_INSTR_(ADDI, I, {CODE_BIN_IU(+)})
+_INSTR_(ANDI, I, {CODE_BIN_IU(&)})
+_INSTR_(ORI, I, {CODE_BIN_IU(|)})
+_INSTR_(XORI, I, {CODE_BIN_IU(^)})
 _INSTR_(SLLI, I, {})
 _INSTR_(SRLI, I, {})
 _INSTR_(SRAI, I, {})
