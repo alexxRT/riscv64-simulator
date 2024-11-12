@@ -1,6 +1,7 @@
 #ifndef INSTRUCTION_H
 #define INSTRUCTION_H
 
+#include <csignal>
 #include <cstdint>
 #include <iostream>
 #include <functional>
@@ -16,7 +17,8 @@
 #define RD_INIT {rd = (code&INSN_FIELD_RD) >> RD_SHIFT;}
 #define RS1_INIT {rs1 = (code&INSN_FIELD_RS1) >> RS1_SHIFT;}
 #define RS2_INIT {rs2 = (code&INSN_FIELD_RS2) >> RS2_SHIFT;}
-#define SIGN_INIT {sign = code & (1<<31); code &= ~(1<<31);}
+#define SIGN_INIT {sign = code>>31;}
+#define SIGNN(n) (~((1ULL<<n)-1))
 
 class Heart;
 
@@ -48,7 +50,7 @@ class InstructionI : public Instruction {
 public:
     InstructionI(instT code, executorT execute_) : Instruction(code, execute_) {
         RS1_INIT RD_INIT SIGN_INIT
-        imm = ((code&INSN_FIELD_IMM12) >> 20) | sign;
+        imm = ((code&INSN_FIELD_IMM12) >> 20) | (sign * SIGNN(12));
     }
 };
 
@@ -58,7 +60,7 @@ public:
         RS1_INIT RS2_INIT SIGN_INIT
         imm = ((code&INSN_FIELD_IMM12HI) >> 20)
             | ((code&INSN_FIELD_IMM12LO) >> 7)
-            | sign;
+            | (sign * SIGNN(12));
     }
 };
 
@@ -69,15 +71,15 @@ public:
         imm = ((code & (1<<7)) << 4)
             | ((code & 0x7e000000) >> 20)
             | ((code & 0xf00) >> 7)
-            | sign;
+            | (sign * SIGNN(13));
     }
 };
 
 class InstructionU : public Instruction {
 public:
     InstructionU(instT code, executorT execute_) : Instruction(code, execute_) {
-        RD_INIT
-        imm = (code & INSN_FIELD_IMM20);
+        RD_INIT SIGN_INIT
+        imm = (code & INSN_FIELD_IMM20) | (sign * SIGNN(32));
     }
 };
 
@@ -88,7 +90,7 @@ public:
         imm = ((code & INSN_FIELD_ZIMM10) >> 20)
             | ((code & (1<<20)) >> 9)
             | ((code & (0xff000)))
-            | sign;
+            | (sign * SIGNN(21));
     }
 };
 
