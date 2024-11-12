@@ -33,8 +33,8 @@ public:
 
     instT instr_code;
     regIDT rs1, rs2, rd;
-    uint32_t imm;
-    uint32_t sign;
+    uint64_t imm;
+    bool sign;
     executorT execute;
 //    static uint32_t get_key_val(uint16_t func_code, InstrOpCode op_code);
 };
