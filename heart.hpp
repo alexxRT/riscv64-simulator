@@ -3,6 +3,7 @@
 
 #include "instruction.hpp"
 #include "functions.hpp"
+#include "mask.h"
 
 #include <cstdint>
 #include <array>
@@ -41,7 +42,13 @@ class Heart {
             return EXECUTE_STATUS::SUCCESS;
         }
 
-        Instruction* decode(int instruction) {
+        Instruction* decode(uint32_t instruction) {
+            uint32_t fingerprint = instruction & mask[instruction & 128];
+            switch (fingerprint) {
+            #define _INSTR_(name) case MATCH_##name: return new Instruction##name(instruction);
+            #include "instrs.h"
+            #undef _INSTR_
+            }
             Instruction base(instruction);
             switch (base.op_code) {
                 case InstrOpCode::OP:
