@@ -24,113 +24,113 @@ enum class InstrOpCode : uint8_t {
 };
 
 class Instruction {
-    public:
-        Instruction(const bits_t& code);
-        virtual void execute(Heart* heart) {
-            std::cout << "Base class execute called" << std::endl;
-            return; 
-        };
+public:
+    Instruction(const bits_t& code);
+    virtual void execute(Heart* heart) {
+        std::cout << "Base class execute called" << std::endl;
+        return; 
+    };
 
-        InstrOpCode op_code;
-        bits_t      instr_code;
+    InstrOpCode op_code;
+    bits_t      instr_code;
 
-        static bits_t opcode_mask;
+    static bits_t opcode_mask;
 
-        static void build_functions_map(std::map<uint32_t, function_t>& functions);
-        static uint32_t get_key_val(uint16_t func_code, InstrOpCode op_code);
+    static void build_functions_map(std::map<uint32_t, function_t>& functions);
+    static uint32_t get_key_val(uint16_t func_code, InstrOpCode op_code);
 };
 
 class InstructionR : public Instruction {
-    public:
-        InstructionR(const bits_t& code);
-        function_t   executor;
+public:
+    InstructionR(const bits_t& code);
+    function_t   executor;
 
-        bits_t rs_1;
-        bits_t rs_2;
-        bits_t rd;
-        bits_t fun_code;
+    bits_t rs_1;
+    bits_t rs_2;
+    bits_t rd;
+    bits_t fun_code;
 
-        static bits_t opcode_mask;
-        static bits_t funct7_mask;
-        static bits_t rs2_mask;
-        static bits_t rs1_mask;
-        static bits_t funct3_mask;
-        static bits_t rd_mask;
+    static bits_t opcode_mask;
+    static bits_t funct7_mask;
+    static bits_t rs2_mask;
+    static bits_t rs1_mask;
+    static bits_t funct3_mask;
+    static bits_t rd_mask;
 
-        virtual void execute(Heart* heart) override;
+    virtual void execute(Heart* heart) override;
 };
 
 class InstructionI : public Instruction {
-    public:
-        InstructionI(const bits_t& code);
-        function_t  executor;
+public:
+    InstructionI(const bits_t& code);
+    function_t  executor;
 
-        bits_t rs_1;
-        bits_t rd;
-        bits_t fun_code;
-        bits_t imm;
+    bits_t rs_1;
+    bits_t rd;
+    bits_t fun_code;
+    bits_t imm;
 
-        static bits_t imm_mask;
-        static bits_t rs1_mask;
-        static bits_t funct3_mask;
-        static bits_t rd_mask;
-        static bits_t opcode_mask;
+    static bits_t imm_mask;
+    static bits_t rs1_mask;
+    static bits_t funct3_mask;
+    static bits_t rd_mask;
+    static bits_t opcode_mask;
 
-        virtual void execute(Heart* heart) override;
+    virtual void execute(Heart* heart) override;
 };
 
 class InstructionS : public Instruction {
-    public:
-        InstructionS(const bits_t& code);
-        function_t  executor;
+public:
+    InstructionS(const bits_t& code);
+    function_t  executor;
 
-        bits_t rs_1;
-        bits_t rs_2;
-        bits_t fun_code;
-        bits_t imm;
+    bits_t rs_1;
+    bits_t rs_2;
+    bits_t fun_code;
+    bits_t imm;
 
-        static bits_t imm_lead_mask;
-        static bits_t rs2_mask;
-        static bits_t rs1_mask;
-        static bits_t funct3_mask;
-        static bits_t imm_tail_mask;
-        static bits_t opcode_mask;
+    static bits_t imm_lead_mask;
+    static bits_t rs2_mask;
+    static bits_t rs1_mask;
+    static bits_t funct3_mask;
+    static bits_t imm_tail_mask;
+    static bits_t opcode_mask;
 
-        virtual void execute(Heart* heart) override;
+    virtual void execute(Heart* heart) override;
 };
 
 class InstructionU : public Instruction {
-    public:
-        InstructionU(const bits_t& code);
-        function_t  executor;
+public:
+    InstructionU(const bits_t& code);
+    function_t  executor;
 
-        bits_t rd;
-        bits_t imm;
+    bits_t rd;
+    bits_t imm;
 
-        static bits_t imm_mask;
-        static bits_t rd_mask;
-        static bits_t opcode_mask;
+    static bits_t imm_mask;
+    static bits_t rd_mask;
+    static bits_t opcode_mask;
 
-        virtual void execute(Heart* heart);
+    virtual void execute(Heart* heart);
 };
 
 class InstructionB : public InstructionS {
-    public:
-        InstructionB(const bits_t& code);
+public:
+    InstructionB(const bits_t& code);
 
-        int16_t get_branch_offset();
-        int16_t branch_offset;
+    int16_t get_branch_offset();
+    int16_t branch_offset;
 
-        virtual void execute(Heart* heart) override;
+    virtual void execute(Heart* heart) override;
 };
 
 class InstructionJ : public InstructionU {
-    public:
-        InstructionJ(const bits_t& code);
+public:
+    InstructionJ(const bits_t& code);
 
-        int16_t get_offset();
-        int16_t offset;
+    int16_t get_offset();
+    int16_t offset;
 
-        virtual void execute(Heart* heart) override;
+    virtual void execute(Heart* heart) override;
 };
 #endif
