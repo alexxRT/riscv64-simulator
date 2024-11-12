@@ -1,3 +1,4 @@
+#include "encoding.out.h"
 // #define _INSTR_(name, type, code)
 
 _INSTR_(SLTI, I, {})
