@@ -4,7 +4,7 @@ CFLAGS = -Wno-initializer-overrides -Wno-c99-designator $(INCLUDE)
 BUILDDIR = Build
 
 XCC = riscv64-elf-gcc
-XCFLAGS = -nostdlib -march=rv64g
+XCFLAGS = -nostdlib -march=rv64i
 
 all: mkdir sample
 	$(CC) $(CFLAGS) main.cpp instruction.cpp mask.cpp -o $(BUILDDIR)/simulator
