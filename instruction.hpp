@@ -69,9 +69,9 @@ public:
     InstructionB(instT code, executorT execute_) : Instruction(code, execute_) {
         RS1_INIT RS2_INIT SIGN_INIT
         imm = ((code & (1<<7)) << 4)
-            | ((code & 0x7e000000) >> 20)
+            | ((code & 0xfe000000) >> 20)
             | ((code & 0xf00) >> 7)
-            | (sign * SIGNN(13));
+            | (sign * SIGNN(12));
     }
 };
 

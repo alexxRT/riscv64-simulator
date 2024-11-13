@@ -40,7 +40,7 @@ lop:
         0x00018133,
         0x000201b3,
         0x00138393,
-        0xfe13cee3,
+        0xfe13c8e3,
         0xFFFFFFFF
     };
 
