@@ -16,8 +16,8 @@ enum class EXECUTE_STATUS : int {
 
 class Heart {
 public:
-    uint64_t pc;
-    uint64_t new_pc;
+    ssize_t pc;
+    ssize_t new_pc;
     std::array<regT, REGISTERS_NUM> registers;
     uint8_t *memory;
 
