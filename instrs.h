@@ -50,6 +50,7 @@ _INSTR_(SRAW, R, {}) // TODO
 _INSTR_(SUB, R, {CODE_BIN_RU(-)})
 _INSTR_(SUBW, R, {}) // TODO
 _INSTR_(ADDW, R, {}) // TODO
+_INSTR_(ADDIW, I, {}) // TODO
 _INSTR_(JAL, J, { NEW_PC = PC + IMM; SET_REG(RD, PC + 4); })
 _INSTR_(JALR, I, { NEW_PC = (IMM + REG(RS1)) & ~1ULL; SET_REG(RD, PC + 4); })
 _INSTR_(BEQ, B, {CODE_CJU(==)})
@@ -58,7 +59,6 @@ _INSTR_(BLT, B, {CODE_CJS(<)})
 _INSTR_(BLTU, B, {CODE_CJU(<)})
 _INSTR_(BGE, B, {CODE_CJS(>=)})
 _INSTR_(BGEU, B, {CODE_CJU(>=)})
-_INSTR_(ADDIW, I, {}) // TODO
 // TODO check type conversions
 _INSTR_(LD, I, { SET_REG(RD, *(uint64_t*)MEM(REG(RS1)+IMM)); })
 _INSTR_(LW, I, { SET_REG(RD, *(int32_t*)MEM(REG(RS1)+IMM)); })
