@@ -50,7 +50,7 @@ public:
     }
 
     Instruction* decode(uint32_t instruction) {
-        uint32_t fingerprint = instruction & mask[instruction & 128];
+        uint32_t fingerprint = instruction & mask[instruction & 127];
         switch (fingerprint) {
         #define _INSTR_(name, type, code) case MATCH_##name: return new Instruction##type(instruction, Executors::exec_##name);
         #include "instrs.h"
