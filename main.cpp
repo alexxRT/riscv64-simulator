@@ -1,11 +1,11 @@
-#include "heart.hpp"
+#include "hart.hpp"
 
 #include <cstdint>
 #include <vector>
 
 int main() {
     std::vector<uint32_t> instrs;
-    Heart heart;
+    Hart heart;
 
     // load 5 to x10
     instrs.push_back(0x00500513);

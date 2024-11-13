@@ -20,7 +20,7 @@
 #define SIGN_INIT {sign = code>>31;}
 #define SIGNN(n) (~((1ULL<<n)-1))
 
-class Heart;
+class Hart;
 
 typedef uint64_t regT;
 typedef uint32_t instT;
@@ -28,7 +28,7 @@ typedef uint8_t regIDT;
 
 class Instruction {
 public:
-    typedef std::function<void (Heart*, const Instruction&)> executorT;
+    typedef std::function<void (Hart*, const Instruction&)> executorT;
     Instruction(instT code, executorT execute_) : execute(execute_) {}
 
     instT instr_code;
@@ -95,11 +95,11 @@ public:
 };
 
 namespace Executors {
-void empty_executor(Heart *heart, const Instruction &instr); // example
+void empty_executor(Hart *heart, const Instruction &instr); // example
 
 
 #define _INSTR_(name, type, code) \
-void exec_##name(Heart *heart, const Instruction &instr);
+void exec_##name(Hart *heart, const Instruction &instr);
 
 #include "instrs.h"
 #undef _INSTR_

@@ -1,5 +1,5 @@
-#ifndef HEART_H
-#define HEART_H
+#ifndef HART_H
+#define HART_H
 
 #include "instruction.hpp"
 #include "mask.h"
@@ -21,14 +21,14 @@ enum class EXECUTE_STATUS : int {
     BAD_ADDRES = 1
 };
 
-class Heart {
+class Hart {
 public:
     ssize_t pc;
     ssize_t new_pc;
     std::array<regT, REGISTERS_NUM> registers;
     uint8_t *memory;
 
-    Heart() : registers({}), pc(0), memory(nullptr) { }
+    Hart() : registers({}), pc(0), memory(nullptr) { }
 
     uint64_t get_reg(int ind) {
         return registers[ind];
@@ -80,4 +80,4 @@ public:
     }
 };
 
-#endif //HEART_H
+#endif //HART_H
