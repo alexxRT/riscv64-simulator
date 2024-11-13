@@ -13,6 +13,7 @@ int main() {
     instrs.push_back(0x00200193);
     // add x3 to x10 and put result in x17
     instrs.push_back(0x003508b3);
+    instrs.push_back(0xFFFFFFFF);
 
     heart.memory = (uint8_t*)instrs.data();
     heart.simulate();

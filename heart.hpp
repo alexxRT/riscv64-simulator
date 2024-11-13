@@ -7,6 +7,13 @@
 #include <cstdint>
 #include <array>
 
+//#define DEBUG
+#ifdef DEBUG
+#define DEB(x) std::cout << x << '\n';
+#else 
+#define DEB(x) 
+#endif
+
 const int REGISTERS_NUM = 32;
 
 enum class EXECUTE_STATUS : int {
@@ -36,11 +43,14 @@ public:
         // execute
         Instruction *decoded = new Instruction(0, nullptr);
         while (true) {
-            decode(*(uint32_t*)(memory+pc), decoded);
+            DEB("decoding at pc=" << pc);
+            bool ok = decode(*(uint32_t*)(memory+pc), decoded);
+            DEB("decoded");
             new_pc = pc + 4;
-            if (!decoded)
+            if (!ok) {
+               std:std::cerr << "not decoded:(\n";
                 return EXECUTE_STATUS::BAD_ADDRES;
-
+            }
             decoded->execute(this, *decoded);
 
             pc = new_pc;
@@ -51,14 +61,21 @@ public:
         return EXECUTE_STATUS::SUCCESS;
     }
 
-    Instruction* decode(uint32_t instruction, Instruction *ptr) {
+    bool decode(uint32_t instruction, Instruction *ptr) {
         uint32_t fingerprint = instruction & mask[instruction & 127];
         switch (fingerprint) {
-        #define _INSTR_(name, type, code) case MATCH_##name: return new(ptr) Instruction##type(instruction, Executors::exec_##name);
+        #define _INSTR_(name, type, code) \
+            case MATCH_##name: \
+            DEB("decoded: " #name); \
+            new(ptr) Instruction##type(instruction, Executors::exec_##name); \
+            return true;
         #include "instrs.h"
         #undef _INSTR_
+        case 0xFFFFFFFF: 
+            DEB("exit");
+            return false;
         }
-        return nullptr;
+        return false;
     }
 };
 
