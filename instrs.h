@@ -10,7 +10,7 @@
 #define NEW_PC (heart->new_pc)
 #define MEM(ind) (heart->memory+(ind))
 #define REG(reg) (heart->get_reg(reg))
-#define SET_REG(reg, val) (heart->set_reg(reg, val));
+#define SET_REG(reg, val) (heart->set_reg(reg, val)); DEB("set reg: " << REG(reg));
 
 #define CODE_BIN_IU(op) SET_REG(RD, REG(RS1) op IMM);
 #define CODE_BIN_IS(op) SET_REG(RD, ((int64_t)REG(RS1)) op ((int64_t)IMM));

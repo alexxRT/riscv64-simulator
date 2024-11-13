@@ -7,7 +7,7 @@
 #include <cstdint>
 #include <array>
 
-//#define DEBUG
+#define DEBUG
 #ifdef DEBUG
 #define DEB(x) std::cout << x << '\n';
 #else 
@@ -68,6 +68,7 @@ public:
             case MATCH_##name: \
             DEB("decoded: " #name); \
             new(ptr) Instruction##type(instruction, Executors::exec_##name); \
+            DEB("RS1 RS2 RD IMM: " << (int)ptr->rs1 << ' ' << (int)ptr->rs2 << ' ' << (int)ptr->rd << ' ' << (int)ptr->imm) \
             return true;
         #include "instrs.h"
         #undef _INSTR_
