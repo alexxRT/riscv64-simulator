@@ -50,7 +50,7 @@ class InstructionI : public Instruction {
 public:
     InstructionI(instT code, executorT execute_) : Instruction(code, execute_) {
         RS1_INIT RD_INIT SIGN_INIT
-        imm = ((code&INSN_FIELD_IMM12) >> 20) | (sign * SIGNN(12));
+        imm = ((code&INSN_FIELD_IMM12) >> 20) | (sign * SIGNN(11));
     }
 };
 
@@ -79,7 +79,7 @@ class InstructionU : public Instruction {
 public:
     InstructionU(instT code, executorT execute_) : Instruction(code, execute_) {
         RD_INIT SIGN_INIT
-        imm = (code & INSN_FIELD_IMM20) | (sign * SIGNN(32));
+        imm = (code & INSN_FIELD_IMM20) | (sign * SIGNN(31));
     }
 };
 
@@ -90,7 +90,7 @@ public:
         imm = ((code & INSN_FIELD_ZIMM10) >> 20)
             | ((code & (1<<20)) >> 9)
             | ((code & (0xff000)))
-            | (sign * SIGNN(21));
+            | (sign * SIGNN(20));
     }
 };
 
