@@ -14,21 +14,28 @@ class ElfReader {
     public:
         ElfReader(std::string filename): reader(), file_loaded_(false) {
             file_loaded_ = reader.load(filename);
+            vmem = new uint8_t[1024*1024*1024];
         };
+
+        ~ElfReader() {
+            delete[] vmem;
+        }
 
         ReaderStatus load_instructions(Hart& hart) {
             if (!file_loaded_) {
                 return ReaderStatus::BAD_FILE;
             }
 
-            char* data = nullptr;
             uint64_t segment_start = 0, segment_end = 0;
             for (const auto& segment : reader.segments) {
                 if (segment->get_type() == ELFIO::PT_LOAD && (segment->get_flags() & ELFIO::PF_X)) {
-                    segment_start = segment->get_virtual_address();
-                    segment_end = segment_start + segment->get_memory_size();
+                    size_t msize = segment->get_memory_size();
 
-                    data = const_cast<char*>(segment->get_data());
+                    segment_start = segment->get_virtual_address();
+                    segment_end = segment_start + msize;
+
+                    std::memcpy(&vmem[segment_start], segment->get_data(), msize);
+
                     break;
                 }
             }
@@ -38,9 +45,9 @@ class ElfReader {
                     uint64_t section_start = section->get_address();
                     uint64_t section_end = section_start + section->get_size();
 
-                    if (data && section_start >= segment_start && section_end <= segment_end) {
-                        hart.memory = (uint8_t*)(section->get_data());
-                        hart.pc = 0; // section_start;
+                    if (vmem && section_start >= segment_start && section_end <= segment_end) {
+                        hart.memory = vmem;
+                        hart.pc = section_start;
 
                         return ReaderStatus::SUCCESS;
                     }
@@ -55,6 +62,7 @@ class ElfReader {
         }
 
         ELFIO::elfio reader;
+        uint8_t* vmem;
 
     private:
         bool file_loaded_;
