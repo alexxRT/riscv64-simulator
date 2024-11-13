@@ -17,7 +17,7 @@ class ElfReader {
         };
 
         ReaderStatus load_instructions(Heart& heart) {
-            if (!file_loaded) {
+            if (!file_loaded_) {
                 return ReaderStatus::BAD_FILE;
             }
 
@@ -58,6 +58,6 @@ class ElfReader {
 
     private:
         bool file_loaded_;
-}
+};
 
 #endif //ELF_READER_H
