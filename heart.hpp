@@ -16,8 +16,8 @@ enum class EXECUTE_STATUS : int {
 
 class Heart {
 public:
-    uint32_t pc;
-    uint32_t new_pc;
+    uint64_t pc;
+    uint64_t new_pc;
     std::array<regT, REGISTERS_NUM> registers;
     uint8_t *memory;
 
@@ -34,8 +34,9 @@ public:
     EXECUTE_STATUS simulate() {
         EXECUTE_STATUS status = EXECUTE_STATUS::SUCCESS;
         // execute
+        Instruction *decoded = new Instruction(0, nullptr);
         while (true) {
-            Instruction* decoded = decode(*(uint32_t*)(memory+pc));
+            decode(*(uint32_t*)(memory+pc), decoded);
             new_pc = pc + 4;
             if (!decoded)
                 return EXECUTE_STATUS::BAD_ADDRES;
@@ -46,13 +47,14 @@ public:
             if (status != EXECUTE_STATUS::SUCCESS)
                 return status;
         }
+        delete decoded;
         return EXECUTE_STATUS::SUCCESS;
     }
 
-    Instruction* decode(uint32_t instruction) {
+    Instruction* decode(uint32_t instruction, Instruction *ptr) {
         uint32_t fingerprint = instruction & mask[instruction & 127];
         switch (fingerprint) {
-        #define _INSTR_(name, type, code) case MATCH_##name: return new Instruction##type(instruction, Executors::exec_##name);
+        #define _INSTR_(name, type, code) case MATCH_##name: return new(ptr) Instruction##type(instruction, Executors::exec_##name);
         #include "instrs.h"
         #undef _INSTR_
         }
