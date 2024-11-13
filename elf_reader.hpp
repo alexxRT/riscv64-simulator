@@ -39,8 +39,8 @@ class ElfReader {
                     uint64_t section_end = section_start + section->get_size();
 
                     if (data && section_start >= segment_start && section_end <= segment_end) {
-                        heart.memory = reinterpret_cast<uint8_t*>(data);
-                        heart.pc = section_start;
+                        heart.memory = (uint8_t*)(section->get_data());
+                        heart.pc = 0; // section_start;
 
                         return ReaderStatus::SUCCESS;
                     }

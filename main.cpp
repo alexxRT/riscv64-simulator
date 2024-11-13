@@ -1,4 +1,5 @@
 #include "heart.hpp"
+#include "elf_reader.hpp"
 
 #include <cstdint>
 #include <vector>
@@ -6,6 +7,7 @@
 int main() {
     std::vector<uint32_t> instrs;
     Heart heart;
+    ElfReader reader("sample_rv64");
 
     // load 5 to x10
     instrs.push_back(0x00500513);
@@ -30,6 +32,7 @@ lop:
     blt x7, x1, lop
 // answer is in x3
 */
+
     std::vector<uint32_t> fib = {
     0x00200393,
         0x00a00093,
@@ -46,10 +49,35 @@ lop:
 
     heart.memory = (uint8_t*)fib.data();
     heart.simulate();
+    std::cout << "fib(10): " << heart.registers[3] << std::endl;
+
+    std::cout << "\n\n\nELF\n\n\n";
+
+    std::cout << "elf reader:\n";
+    if (reader.load_instructions(heart) != ReaderStatus::SUCCESS) {
+        return 1;
+    }
+    heart.simulate();
+    exit(0);
+    std::vector<uint32_t> elfsim = {
+        0x00a00513,
+        0x01400593,
+        0x00b50633,
+        0x40a586b3,
+        0xFFFFFFFF
+    };
+
+    Heart heart2;
+    heart2.new_pc = 0;
+    heart2.pc = 0;
+    heart2.memory = (uint8_t*)elfsim.data();
+    heart2.simulate();
+    //    heart.simulate();
+    std::cout << heart2.registers[10] << ' ' << heart2.registers[11] << ' ' << heart2.registers[12] << ' ' << heart2.registers[13] << '\n';
+
 
    // std::cout << "Register 10 value: " << heart.registers[10] << std::endl;
    // std::cout << "Register 3 value: "  << heart.registers[3] << std::endl;
-    std::cout << "fib(10): " << heart.registers[3] << std::endl;
 
     return 0;
 }
