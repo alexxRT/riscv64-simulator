@@ -1,9 +1,16 @@
-CC = g++
-CFLAGS =
+CC = clang++
+INCLUDE = -I../ELFIOgit
+CFLAGS = -Wno-initializer-overrides -Wno-c99-designator $(INCLUDE)
 BUILDDIR = Build
 
-all: mkdir
-	$(CC) $(CFLAGS) main.cpp functions.cpp instructions.cpp -o $(BUILDDIR)/simulator
+XCC = riscv64-elf-gcc
+XCFLAGS = -nostdlib -march=rv64g
+
+all: mkdir sample
+	$(CC) $(CFLAGS) main.cpp instruction.cpp mask.cpp -o $(BUILDDIR)/simulator
+
+sample:
+	$(XCC) $(XCFLAGS) sample_rv64.s -o $(BUILDDIR)/sample_rv64
 
 mkdir:
 	mkdir -p $(BUILDDIR)
