@@ -7,7 +7,7 @@
 int main() {
     std::vector<uint32_t> instrs;
     Hart hart;
-    ElfReader reader("sample_rv64");
+    ElfReader reader("Build/sample_rv64");
 
     // load 5 to x10
     instrs.push_back(0x00500513);
