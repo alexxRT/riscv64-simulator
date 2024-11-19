@@ -1,7 +1,7 @@
 CC = clang++
 INCLUDE = -I../ELFIOgit
 CFLAGS = -Wno-initializer-overrides -Wno-c99-designator $(INCLUDE)
-BUILDDIR = Build
+BUILDDIR = build
 
 XCC = riscv64-elf-gcc
 XCFLAGS = -nostdlib -march=rv64i

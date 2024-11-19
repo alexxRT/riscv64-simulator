@@ -24,7 +24,6 @@ lop:
 */
 
     Hart hart;
-    ElfReader reader("sample_rv64");
     std::vector<uint32_t> fib = {
         0x00200393,
         0x00a00093,
@@ -51,9 +50,11 @@ lop:
 
 bool test_elf_reader() {
     Hart hart;
-    ElfReader reader("sample_rv64");
-    if (reader.load_instructions(hart) != ReaderStatus::SUCCESS) {
+    ElfReader reader("build/sample_rv64");
+    ReaderStatus read_st = reader.load_instructions(hart);
+    if (read_st != ReaderStatus::SUCCESS) {
         std::cout << "failed to load instrs, ELF LOAD test failed :(\n";
+        std::cout << "load err: " << int(read_st) << '\n';
         return false;
     }
     hart.simulate();
