@@ -6,7 +6,6 @@
 #include <cstdint>
 #include <vector>
 
-
 bool test_fib_imm() {
     // fibonacci
     /*
