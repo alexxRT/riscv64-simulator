@@ -1,22 +1,12 @@
+//#define DEBUG
+
 #include "hart.hpp"
 #include "elf_reader.hpp"
 
 #include <cstdint>
 #include <vector>
 
-int main() {
-    std::vector<uint32_t> instrs;
-    Hart hart;
-    ElfReader reader("Build/sample_rv64");
-
-    // load 5 to x10
-    instrs.push_back(0x00500513);
-    // load 2 to x3
-    instrs.push_back(0x00200193);
-    // add x3 to x10 and put result in x17
-    instrs.push_back(0x003508b3);
-    instrs.push_back(0xFFFFFFFF);
-
+bool test_fib_imm() {
     // fibonacci
     /*
 _start:
@@ -33,8 +23,10 @@ lop:
 // answer is in x3
 */
 
+    Hart hart;
+    ElfReader reader("sample_rv64");
     std::vector<uint32_t> fib = {
-    0x00200393,
+        0x00200393,
         0x00a00093,
         0x00000113,
         0x00100193,
@@ -49,35 +41,39 @@ lop:
 
     hart.memory = (uint8_t*)fib.data();
     hart.simulate();
-    std::cout << "fib(10): " << hart.registers[3] << std::endl;
+    std::cout << "fib(9): " << hart.registers[3] << " (34=>ok)\n";
+    if (hart.registers[3] != 34) {
+        std::cerr << "Fibonacci test from array was not passed!!!\n";
+        return false;
+    }
+    return true;
+}
 
-    std::cout << "\n\n\nELF\n\n\n";
-
-    std::cout << "elf reader:\n";
+bool test_elf_reader() {
+    Hart hart;
+    ElfReader reader("sample_rv64");
     if (reader.load_instructions(hart) != ReaderStatus::SUCCESS) {
-        return 1;
+        std::cout << "failed to load instrs, ELF LOAD test failed :(\n";
+        return false;
     }
     hart.simulate();
-    exit(0);
-    std::vector<uint32_t> elfsim = {
-        0x00a00513,
-        0x01400593,
-        0x00b50633,
-        0x40a586b3,
-        0xFFFFFFFF
-    };
+    bool status = (hart.registers[10] == 10)
+        and (hart.registers[11] == 20)
+        and (hart.registers[12] == 30)
+        and (hart.registers[13] == 10);
+    if (!status) {
+        std::cerr << "read elf test was not passed!!!\n";
+        return false;
+    }
+    return true;
+}
 
-    Hart hart2;
-    hart2.new_pc = 0;
-    hart2.pc = 0;
-    hart2.memory = (uint8_t*)elfsim.data();
-    hart2.simulate();
-    //    hart.simulate();
-    std::cout << hart2.registers[10] << ' ' << hart2.registers[11] << ' ' << hart2.registers[12] << ' ' << hart2.registers[13] << '\n';
-
-
-   // std::cout << "Register 10 value: " << hart.registers[10] << std::endl;
-   // std::cout << "Register 3 value: "  << hart.registers[3] << std::endl;
-
+int main() {
+    if (test_fib_imm() and test_elf_reader())
+        std::cout << "tests are OK!\n";
+    else {
+        std::cout << "tests are bad :(\n";
+        return 1;
+    }
     return 0;
 }
