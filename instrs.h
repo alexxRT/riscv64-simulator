@@ -21,18 +21,27 @@
 #define CODE_CJU(op) ((REG(RS1) op REG(RS2)) && (NEW_PC = PC + IMM));
 #define CODE_CJS(op) ((((int64_t)REG(RS1)) op ((int64_t)REG(RS2))) && (NEW_PC = PC + IMM));
 
+#define SIX_BITS ((1<<6)-1)
+#define FIV_BITS ((1<<5)-1)
+
 _INSTR_(SLTI, I, {CODE_BIN_IS(<)})
 _INSTR_(SLTIU, I, {CODE_BIN_IU(<)})
 _INSTR_(ADDI, I, {CODE_BIN_IU(+)})
 _INSTR_(ANDI, I, {CODE_BIN_IU(&)})
 _INSTR_(ORI, I, {CODE_BIN_IU(|)})
 _INSTR_(XORI, I, {CODE_BIN_IU(^)})
-_INSTR_(SLLI, I, {}) // TODO
-_INSTR_(SRLI, I, {}) // TODO
-//_INSTR_(SRAI, I, {}) // TODO REMOVE because it is the same as SRLI
-_INSTR_(SLLIW, I, {}) // TODO
-_INSTR_(SRLIW, I, {}) // TODO
-_INSTR_(SRAIW, I, {}) // TODO
+_INSTR_(SLLI, I, {SET_REG(RD, REG(RS1) << (IMM & SIX_BITS))}) // TODO check
+_INSTR_(SRLI, I, {SET_REG(RD,
+                          !!(IMM & 1<<10)*(REG(RS1) >> (IMM & SIX_BITS)) // logical
+                          |
+                          !(IMM & 1<<10)*((int64_t)REG(RS1) >> (IMM & SIX_BITS)) // arithmetic
+)}) // TODO check for correctness // WARNING decoded same as SRAI
+_INSTR_(SLLIW, I, {SET_REG(RD, (uint32_t)REG(RS1) << (IMM & SIX_BITS))}) // TODO check
+_INSTR_(SRLIW, I, {SET_REG(RD,
+                          !!(IMM & 1<<10)*((uint32_t)REG(RS1) >> (IMM & SIX_BITS)) // logical
+                          |
+                          !(IMM & 1<<10)*((int32_t)REG(RS1) >> (IMM & SIX_BITS)) // arithmetic
+)}) // TODO check for correctness // WARNING decoded same as SRAIW
 _INSTR_(LUI, U, { SET_REG(RD, (IMM&INSN_FIELD_IMM20)) })
 _INSTR_(AUIPC, U,{ SET_REG(RD, (IMM + PC)) }) 
 _INSTR_(ADD, R, {CODE_BIN_RU(+)})
@@ -41,15 +50,15 @@ _INSTR_(SLTU, R, {CODE_BIN_RU(<)})
 _INSTR_(AND, R, {CODE_BIN_RU(&)})
 _INSTR_(OR, R, {CODE_BIN_RU(|)})
 _INSTR_(XOR, R, {CODE_BIN_RU(^)})
-_INSTR_(SLL, R, {}) // TODO
-_INSTR_(SRL, R, {}) // TODO
-_INSTR_(SRA, R, {}) // TODO
-_INSTR_(SLLW, R, {}) // TODO
-_INSTR_(SRLW, R, {}) // TODO
-_INSTR_(SRAW, R, {}) // TODO
+_INSTR_(SLL, R, {SET_REG(RD, REG(RS1) << (REG(RS2) & SIX_BITS))}) // TODO check
+_INSTR_(SRL, R, {SET_REG(RD, (REG(RS1) >> (REG(RS2) & SIX_BITS)))}) // TODO check
+_INSTR_(SRA, R, {SET_REG(RD, ((int64_t)REG(RS1) >> (REG(RS2) & SIX_BITS)))}) // TODO check
+_INSTR_(SLLW, R, {SET_REG(RD, (uint32_t)REG(RS1) << (REG(RS2) & FIV_BITS))}) // TODO check
+_INSTR_(SRLW, R, {SET_REG(RD, ((uint32_t)REG(RS1) >> (REG(RS2) & FIV_BITS)))}) // TODO check
+_INSTR_(SRAW, R, {SET_REG(RD, ((int32_t)REG(RS1) >> (REG(RS2) & FIV_BITS)))}) // TODO check
 _INSTR_(SUB, R, {CODE_BIN_RU(-)})
-_INSTR_(SUBW, R, {}) // TODO
-_INSTR_(ADDW, R, {}) // TODO
+_INSTR_(SUBW, R, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) - REG(RS2)))}) // TODO check if it's correct but it should be nice
+_INSTR_(ADDW, R, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) + REG(RS2)))}) // TODO check if it's correct but it should be nice
 _INSTR_(JAL, J, { NEW_PC = PC + IMM; SET_REG(RD, PC + 4); })
 _INSTR_(JALR, I, { NEW_PC = (IMM + REG(RS1)) & ~1ULL; SET_REG(RD, PC + 4); })
 _INSTR_(BEQ, B, {CODE_CJU(==)})
@@ -58,7 +67,7 @@ _INSTR_(BLT, B, {CODE_CJS(<)})
 _INSTR_(BLTU, B, {CODE_CJU(<)})
 _INSTR_(BGE, B, {CODE_CJS(>=)})
 _INSTR_(BGEU, B, {CODE_CJU(>=)})
-_INSTR_(ADDIW, I, {}) // TODO
+_INSTR_(ADDIW, I, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) + IMM))}) // TODO check if it's correct but it should be nice
 // TODO check type conversions
 _INSTR_(LD, I, { SET_REG(RD, *(uint64_t*)MEM(REG(RS1)+IMM)); })
 _INSTR_(LW, I, { SET_REG(RD, *(int32_t*)MEM(REG(RS1)+IMM)); })
