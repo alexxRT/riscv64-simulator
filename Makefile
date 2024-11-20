@@ -3,7 +3,7 @@ INCLUDE = -I../ELFIOgit
 CFLAGS = -Wno-initializer-overrides -Wno-c99-designator $(INCLUDE)
 BUILDDIR = build
 
-XCC = $(shell ./compiler_detect.sh)
+XCC = $(shell ./detect_xcompiler.sh)
 XCFLAGS = -nostdlib -march=rv64i
 
 all: mkdir sample
