@@ -50,7 +50,7 @@ void empty_executor(Hart *hart, const Instruction &instr) {} // example
 
 #define _INSTR_(name, type, code) \
 void exec_##name(Hart *heart, const Instruction &instr) { \
-    DEB("exec #name"); \
+    DEB("exec "#name); \
     code }
 
 #include "instrs.h"

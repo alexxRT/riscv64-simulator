@@ -29,7 +29,7 @@ _INSTR_(ORI, I, {CODE_BIN_IU(|)})
 _INSTR_(XORI, I, {CODE_BIN_IU(^)})
 _INSTR_(SLLI, I, {}) // TODO
 _INSTR_(SRLI, I, {}) // TODO
-_INSTR_(SRAI, I, {}) // TODO
+//_INSTR_(SRAI, I, {}) // TODO REMOVE because it is the same as SRLI
 _INSTR_(SLLIW, I, {}) // TODO
 _INSTR_(SRLIW, I, {}) // TODO
 _INSTR_(SRAIW, I, {}) // TODO
