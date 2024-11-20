@@ -28,8 +28,7 @@ class ElfReader {
             }
 
             for (const auto& segment : reader.segments) {
-                if ((segment->get_type() == ELFIO::PT_LOAD) &&
-                    (segment->get_flags() & ELFIO::PF_X)) {
+                if (segment->get_type() == ELFIO::PT_LOAD) {
 
                     uint64_t segment_end = segment->get_virtual_address() + segment->get_memory_size();
                     max_vaddr_ = std::max(max_vaddr_, segment_end);
@@ -45,8 +44,7 @@ class ElfReader {
             }
 
             for (const auto& segment : reader.segments) {
-                if ((segment->get_type() == ELFIO::PT_LOAD) &&
-                    (segment->get_flags() & ELFIO::PF_X)) {
+                if (segment->get_type() == ELFIO::PT_LOAD) {
 
                     uint64_t segment_start = segment->get_virtual_address();
                     size_t segment_size = segment->get_memory_size();
