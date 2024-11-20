@@ -3,7 +3,7 @@ INCLUDE = -I../ELFIOgit
 CFLAGS = -Wno-initializer-overrides -Wno-c99-designator $(INCLUDE)
 BUILDDIR = build
 
-XCC = riscv64-elf-gcc
+XCC = $(shell ./compiler_detect.sh)
 XCFLAGS = -nostdlib -march=rv64i
 
 all: mkdir sample
@@ -17,3 +17,6 @@ mkdir:
 
 clean:
 	rm -rf $(BUILDDIR)
+
+run:
+	$(BUILDDIR)/simulator
