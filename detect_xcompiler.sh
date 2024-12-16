@@ -1,4 +1,8 @@
 #!/bin/sh
 
-IFS=":" read -ra paths <<< "$PATH"
-find "${paths[@]}" -name 'riscv64*elf*gcc' -perm -o=x,-g=x,-u=x
+if ! command -v riscv64-elf-gcc 2>&1 >/dev/null
+then
+    echo riscv64-unknown-elf-gcc
+else
+    echo riscv64-elf-gcc
+fi
