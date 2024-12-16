@@ -45,8 +45,11 @@ void decode_instruction_J(Instruction &ins, instT code) {
 }
 
 namespace Executors {
-void empty_executor(Hart *hart, const Instruction &instr) {} // example
 
+// for basic blocks
+void empty_executor(Hart *hart, const Instruction &instr) {
+    return;
+}
 
 #define EXEC_RET_true (&instr+1)->execute(heart, *(&instr+1))
 #define EXEC_RET_false 
@@ -54,7 +57,8 @@ void empty_executor(Hart *hart, const Instruction &instr) {} // example
 #define _INSTR_(name, type, code, linear) \
 __attribute__((noinline)) void exec_##name(Hart *heart, const Instruction &instr) { \
     DEB("exec "#name); \
-    {code} EXEC_RET_##linear; }
+    {int new_pc = heart->pc+4; code; heart->pc = new_pc;} \
+    EXEC_RET_##linear; }
 
 #include "instrs.h"
 #undef _INSTR_

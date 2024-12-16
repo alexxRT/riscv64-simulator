@@ -1,7 +1,7 @@
 #include <cstdint>
 
 #include "encoding.out.h"
-#include "mask.h"
+#include "mask.hpp"
 
 uint32_t mask[128] = {
 #define _INSTR_(name, ...) [(MATCH_##name & 127)] = MASK_##name,

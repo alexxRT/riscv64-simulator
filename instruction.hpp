@@ -30,6 +30,7 @@ class Instruction {
 public:
     typedef void (*executorT)(Hart*, const Instruction&);
     Instruction(instT code, executorT execute_) : execute(execute_) {}
+    Instruction() {}
 
     instT instr_code;
     regIDT rs1, rs2, rd;
@@ -51,7 +52,7 @@ void decode_instruction_U(Instruction &ins, instT code);
 void decode_instruction_J(Instruction &ins, instT code);
 
 namespace Executors {
-void empty_executor(Hart *heart, const Instruction &instr); // example
+void empty_executor(Hart *heart, const Instruction &instr); // for basic blocks
 
 
 #define _INSTR_(name, type, code, linear) \

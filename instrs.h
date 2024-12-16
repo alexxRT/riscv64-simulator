@@ -7,7 +7,7 @@
 #define RD (instr.rd)
 #define IMM (instr.imm)
 #define PC (heart->pc)
-#define NEW_PC (heart->new_pc)
+#define NEW_PC (new_pc)
 #define MEM(ind) (heart->memory+(ind))
 #define REG(reg) (heart->get_reg(reg))
 #define SET_REG(reg, val) (heart->set_reg(reg, val)); DEB("set reg: " << REG(reg));
@@ -80,3 +80,4 @@ _INSTR_(SD, S, { *(uint64_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false)
 _INSTR_(SW, S, { *(uint32_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false)
 _INSTR_(SH, S, { *(uint16_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false)
 _INSTR_(SB, S, { *(uint8_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false)
+_INSTR_(ECALL, I, {printf("Ecall or ebreak: doing exit...\n"); heart->done = true;}, false) // WARNING same as ebreak // TODO add actuall functionality

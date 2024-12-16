@@ -1,3 +1,6 @@
+#ifndef MASK_H
+#define MASK_H
+
 #include "instruction.hpp"
 #include <cstdint>
 
@@ -14,3 +17,5 @@ struct Decode {
 };
 
 extern Decode decoders[(1<<18)-1];
+
+#endif // MASK_H
