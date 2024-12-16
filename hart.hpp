@@ -80,18 +80,14 @@ public:
             DEB("exit");
             return EXIT;
         }
+
         uint32_t fingerprint = instruction & mask[instruction & 127];
-        switch (fingerprint) {
-        #define _INSTR_(name, type, code) \
-            case MATCH_##name: \
-            DEB("decoded: " #name " type " #type); \
-            new(ptr) Instruction##type(instruction, Executors::exec_##name); \
-            DEB("RS1 RS2 RD IMM: " << (int)ptr->rs1 << ' ' << (int)ptr->rs2 << ' ' << (int)ptr->rd << ' ' << (int)ptr->imm) \
-            return OK;
-        #include "instrs.h"
-        #undef _INSTR_
-        }
-        return ERROR;
+        fingerprint = FP_HASH(fingerprint);
+
+        auto dec = decoders[fingerprint];
+        dec.decod(*ptr, instruction);
+        ptr->execute = dec.exec;
+        return OK;
     }
 };
 
