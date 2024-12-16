@@ -48,10 +48,13 @@ namespace Executors {
 void empty_executor(Hart *hart, const Instruction &instr) {} // example
 
 
-#define _INSTR_(name, type, code) \
-void exec_##name(Hart *heart, const Instruction &instr) { \
+#define EXEC_RET_true (&instr+1)->execute(heart, *(&instr+1))
+#define EXEC_RET_false 
+
+#define _INSTR_(name, type, code, linear) \
+__attribute__((noinline)) void exec_##name(Hart *heart, const Instruction &instr) { \
     DEB("exec "#name); \
-    code }
+    {code} EXEC_RET_##linear; }
 
 #include "instrs.h"
 #undef _INSTR_

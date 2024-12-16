@@ -54,7 +54,7 @@ namespace Executors {
 void empty_executor(Hart *heart, const Instruction &instr); // example
 
 
-#define _INSTR_(name, type, code) \
+#define _INSTR_(name, type, code, linear) \
 void exec_##name(Hart *heart, const Instruction &instr);
 
 #include "instrs.h"

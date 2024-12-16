@@ -1,6 +1,6 @@
 #include "encoding.out.h"
 #include <cstdint>
-// #define _INSTR_(name, type, code)
+// #define _INSTR_(name, type, code, linear)
 
 #define RS1 (instr.rs1)
 #define RS2 (instr.rs2)
@@ -24,59 +24,59 @@
 #define SIX_BITS ((1<<6)-1)
 #define FIV_BITS ((1<<5)-1)
 
-_INSTR_(SLTI, I, {CODE_BIN_IS(<)})
-_INSTR_(SLTIU, I, {CODE_BIN_IU(<)})
-_INSTR_(ADDI, I, {CODE_BIN_IU(+)})
-_INSTR_(ANDI, I, {CODE_BIN_IU(&)})
-_INSTR_(ORI, I, {CODE_BIN_IU(|)})
-_INSTR_(XORI, I, {CODE_BIN_IU(^)})
-_INSTR_(SLLI, I, {SET_REG(RD, REG(RS1) << (IMM & SIX_BITS))}) // TODO check
+_INSTR_(SLTI, I, {CODE_BIN_IS(<)}, true)
+_INSTR_(SLTIU, I, {CODE_BIN_IU(<)}, true)
+_INSTR_(ADDI, I, {CODE_BIN_IU(+)}, true)
+_INSTR_(ANDI, I, {CODE_BIN_IU(&)}, true)
+_INSTR_(ORI, I, {CODE_BIN_IU(|)}, true)
+_INSTR_(XORI, I, {CODE_BIN_IU(^)}, true)
+_INSTR_(SLLI, I, {SET_REG(RD, REG(RS1) << (IMM & SIX_BITS))}, true) // TODO check
 _INSTR_(SRLI, I, {SET_REG(RD,
                           !!(IMM & 1<<10)*(REG(RS1) >> (IMM & SIX_BITS)) // logical
                           |
                           !(IMM & 1<<10)*((int64_t)REG(RS1) >> (IMM & SIX_BITS)) // arithmetic
-)}) // TODO check for correctness // WARNING decoded same as SRAI
-_INSTR_(SLLIW, I, {SET_REG(RD, (uint32_t)REG(RS1) << (IMM & SIX_BITS))}) // TODO check
+)}, true) // TODO check for correctness // WARNING decoded same as SRAI
+_INSTR_(SLLIW, I, {SET_REG(RD, (uint32_t)REG(RS1) << (IMM & SIX_BITS))}, true) // TODO check
 _INSTR_(SRLIW, I, {SET_REG(RD,
                           !!(IMM & 1<<10)*((uint32_t)REG(RS1) >> (IMM & SIX_BITS)) // logical
                           |
                           !(IMM & 1<<10)*((int32_t)REG(RS1) >> (IMM & SIX_BITS)) // arithmetic
-)}) // TODO check for correctness // WARNING decoded same as SRAIW
-_INSTR_(LUI, U, { SET_REG(RD, (IMM&INSN_FIELD_IMM20)) })
-_INSTR_(AUIPC, U,{ SET_REG(RD, (IMM + PC)) }) 
-_INSTR_(ADD, R, {CODE_BIN_RU(+)})
-_INSTR_(SLT, R, {CODE_BIN_RS(<)})
-_INSTR_(SLTU, R, {CODE_BIN_RU(<)})
-_INSTR_(AND, R, {CODE_BIN_RU(&)})
-_INSTR_(OR, R, {CODE_BIN_RU(|)})
-_INSTR_(XOR, R, {CODE_BIN_RU(^)})
-_INSTR_(SLL, R, {SET_REG(RD, REG(RS1) << (REG(RS2) & SIX_BITS))}) // TODO check
-_INSTR_(SRL, R, {SET_REG(RD, (REG(RS1) >> (REG(RS2) & SIX_BITS)))}) // TODO check
-_INSTR_(SRA, R, {SET_REG(RD, ((int64_t)REG(RS1) >> (REG(RS2) & SIX_BITS)))}) // TODO check
-_INSTR_(SLLW, R, {SET_REG(RD, (uint32_t)REG(RS1) << (REG(RS2) & FIV_BITS))}) // TODO check
-_INSTR_(SRLW, R, {SET_REG(RD, ((uint32_t)REG(RS1) >> (REG(RS2) & FIV_BITS)))}) // TODO check
-_INSTR_(SRAW, R, {SET_REG(RD, ((int32_t)REG(RS1) >> (REG(RS2) & FIV_BITS)))}) // TODO check
-_INSTR_(SUB, R, {CODE_BIN_RU(-)})
-_INSTR_(SUBW, R, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) - REG(RS2)))}) // TODO check if it's correct but it should be nice
-_INSTR_(ADDW, R, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) + REG(RS2)))}) // TODO check if it's correct but it should be nice
-_INSTR_(JAL, J, { NEW_PC = PC + IMM; SET_REG(RD, PC + 4); })
-_INSTR_(JALR, I, { NEW_PC = (IMM + REG(RS1)) & ~1ULL; SET_REG(RD, PC + 4); })
-_INSTR_(BEQ, B, {CODE_CJU(==)})
-_INSTR_(BNE, B, {CODE_CJU(!=)})
-_INSTR_(BLT, B, {CODE_CJS(<)})
-_INSTR_(BLTU, B, {CODE_CJU(<)})
-_INSTR_(BGE, B, {CODE_CJS(>=)})
-_INSTR_(BGEU, B, {CODE_CJU(>=)})
-_INSTR_(ADDIW, I, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) + IMM))}) // TODO check if it's correct but it should be nice
+)}, true) // TODO check for correctness // WARNING decoded same as SRAIW
+_INSTR_(LUI, U, { SET_REG(RD, (IMM&INSN_FIELD_IMM20)) }, true)
+_INSTR_(AUIPC, U,{ SET_REG(RD, (IMM + PC)) }, true) 
+_INSTR_(ADD, R, {CODE_BIN_RU(+)}, true)
+_INSTR_(SLT, R, {CODE_BIN_RS(<)}, true)
+_INSTR_(SLTU, R, {CODE_BIN_RU(<)}, true)
+_INSTR_(AND, R, {CODE_BIN_RU(&)}, true)
+_INSTR_(OR, R, {CODE_BIN_RU(|)}, true)
+_INSTR_(XOR, R, {CODE_BIN_RU(^)}, true)
+_INSTR_(SLL, R, {SET_REG(RD, REG(RS1) << (REG(RS2) & SIX_BITS))}, true) // TODO check
+_INSTR_(SRL, R, {SET_REG(RD, (REG(RS1) >> (REG(RS2) & SIX_BITS)))}, true) // TODO check
+_INSTR_(SRA, R, {SET_REG(RD, ((int64_t)REG(RS1) >> (REG(RS2) & SIX_BITS)))}, true) // TODO check
+_INSTR_(SLLW, R, {SET_REG(RD, (uint32_t)REG(RS1) << (REG(RS2) & FIV_BITS))}, true) // TODO check
+_INSTR_(SRLW, R, {SET_REG(RD, ((uint32_t)REG(RS1) >> (REG(RS2) & FIV_BITS)))}, true) // TODO check
+_INSTR_(SRAW, R, {SET_REG(RD, ((int32_t)REG(RS1) >> (REG(RS2) & FIV_BITS)))}, true) // TODO check
+_INSTR_(SUB, R, {CODE_BIN_RU(-)}, true)
+_INSTR_(SUBW, R, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) - REG(RS2)))}, true) // TODO check if it's correct but it should be nice
+_INSTR_(ADDW, R, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) + REG(RS2)))}, true) // TODO check if it's correct but it should be nice
+_INSTR_(JAL, J, { NEW_PC = PC + IMM; SET_REG(RD, PC + 4); }, false)
+_INSTR_(JALR, I, { NEW_PC = (IMM + REG(RS1)) & ~1ULL; SET_REG(RD, PC + 4); }, false)
+_INSTR_(BEQ, B, {CODE_CJU(==)}, false)
+_INSTR_(BNE, B, {CODE_CJU(!=)}, false)
+_INSTR_(BLT, B, {CODE_CJS(<)}, false)
+_INSTR_(BLTU, B, {CODE_CJU(<)}, false)
+_INSTR_(BGE, B, {CODE_CJS(>=)}, false)
+_INSTR_(BGEU, B, {CODE_CJU(>=)}, false)
+_INSTR_(ADDIW, I, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) + IMM))}, true) // TODO check if it's correct but it should be nice
 // TODO check type conversions
-_INSTR_(LD, I, { SET_REG(RD, *(uint64_t*)MEM(REG(RS1)+IMM)); })
-_INSTR_(LW, I, { SET_REG(RD, *(int32_t*)MEM(REG(RS1)+IMM)); })
-_INSTR_(LWU, I, { SET_REG(RD, *(uint32_t*)MEM(REG(RS1)+IMM)); })
-_INSTR_(LH, I, { SET_REG(RD, *(int16_t*)MEM(REG(RS1)+IMM)); })
-_INSTR_(LHU, I, { SET_REG(RD, *(uint16_t*)MEM(REG(RS1)+IMM)); })
-_INSTR_(LB, I, { SET_REG(RD, *(int8_t*)MEM(REG(RS1)+IMM)); })
-_INSTR_(LBU, I, { SET_REG(RD, *(uint8_t*)MEM(REG(RS1)+IMM)); })
-_INSTR_(SD, S, { *(uint64_t*)MEM(REG(RS1)+IMM) = REG(RS2); })
-_INSTR_(SW, S, { *(uint32_t*)MEM(REG(RS1)+IMM) = REG(RS2); })
-_INSTR_(SH, S, { *(uint16_t*)MEM(REG(RS1)+IMM) = REG(RS2); })
-_INSTR_(SB, S, { *(uint8_t*)MEM(REG(RS1)+IMM) = REG(RS2); })
+_INSTR_(LD, I, { SET_REG(RD, *(uint64_t*)MEM(REG(RS1)+IMM)); }, false)
+_INSTR_(LW, I, { SET_REG(RD, *(int32_t*)MEM(REG(RS1)+IMM)); }, false)
+_INSTR_(LWU, I, { SET_REG(RD, *(uint32_t*)MEM(REG(RS1)+IMM)); }, false)
+_INSTR_(LH, I, { SET_REG(RD, *(int16_t*)MEM(REG(RS1)+IMM)); }, false)
+_INSTR_(LHU, I, { SET_REG(RD, *(uint16_t*)MEM(REG(RS1)+IMM)); }, false)
+_INSTR_(LB, I, { SET_REG(RD, *(int8_t*)MEM(REG(RS1)+IMM)); }, false)
+_INSTR_(LBU, I, { SET_REG(RD, *(uint8_t*)MEM(REG(RS1)+IMM)); }, false)
+_INSTR_(SD, S, { *(uint64_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false)
+_INSTR_(SW, S, { *(uint32_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false)
+_INSTR_(SH, S, { *(uint16_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false)
+_INSTR_(SB, S, { *(uint8_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false)
