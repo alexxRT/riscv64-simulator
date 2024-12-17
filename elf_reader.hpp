@@ -48,24 +48,17 @@ class ElfReader {
 
                     uint64_t segment_start = segment->get_virtual_address();
                     size_t segment_size = segment->get_memory_size();
+                    const char* data = segment->get_data();
 
-                    std::memcpy(&vmem_[segment_start], segment->get_data(), segment_size);
-                }
-            }
-
-            for (const auto& section : reader.sections) {
-                if (section->get_name() == ".text") {
-
-                    uint64_t section_start = section->get_address();
-                    uint64_t section_end = section_start + section->get_size();
-                    if (section_end > max_vaddr_) {
-                        return ReaderStatus::BAD_SECTION;
+                    if (data) {
+                        std::memcpy(&(vmem_[segment_start]), data, segment_size);
+                    } else { // e.g. .sbss section
+                        std::memset(&(vmem_[segment_start]), 0, segment_size);
                     }
-
-                    hart.pc = section_start;
-                    break;
                 }
             }
+
+            hart.pc = reader.get_entry();
 
             hart.memory = vmem_;
             return ReaderStatus::SUCCESS;
