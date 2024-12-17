@@ -19,10 +19,13 @@ size_t BasicBlock::construct(const instT *arr) {
         DEB("decoding..");
         dec.decod(instrs[i], instruction);
         instrs[i].execute = dec.exec;
-        if (!dec.linear)
-            break;
+        if (!dec.linear) {
+            len = i + 1;
+            return i;
+        }
     }
     DEB("decoded\n");
     instrs[BB_len].execute = Executors::empty_executor;
-    return i;
+    len = BB_len+1;
+    return BB_len+1;
 }
