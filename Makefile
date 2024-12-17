@@ -4,7 +4,7 @@ CFLAGS = -Wno-initializer-overrides -Wno-c99-designator $(INCLUDE)
 BUILDDIR = build
 
 XCC = $(shell ./detect_xcompiler.sh)
-XCFLAGS = -nostdlib -march=rv64i -mabi=lp64d
+XCFLAGS = -nostdlib -march=rv64i -mabi=lp64
 
 all: mkdir sample 8queens
 	$(CC) $(CFLAGS) main.cpp instruction.cpp mask.cpp -o $(BUILDDIR)/simulator

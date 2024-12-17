@@ -71,7 +71,7 @@ bool test_elf_reader() {
 
 void run_8q() {
     Hart hart;
-    ElfReader reader("build/8q");
+    ElfReader reader("build/8queens");
     ReaderStatus read_st = reader.load_instructions(hart);
     if (read_st != ReaderStatus::SUCCESS) {
         std::cout << "failed to load instrs, ELF LOAD test failed :(\n";
