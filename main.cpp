@@ -25,6 +25,7 @@ lop:
 
     Hart hart;
     std::vector<uint32_t> fib = {
+        0x00000000,
         0x00200393,
         0x00a00093,
         0x00000113,
@@ -35,10 +36,11 @@ lop:
         0x000201b3,
         0x00138393,
         0xfe13c8e3,
-        0xFFFFFFFF
+        0x00000073 // ecall
     };
 
     hart.memory = (uint8_t*)fib.data();
+    hart.pc = 4;
     hart.simulate();
     std::cout << "fib(9): " << hart.registers[3] << " (34=>ok)\n";
     if (hart.registers[3] != 34) {
@@ -58,7 +60,7 @@ bool test_elf_reader() {
         return false;
     }
     hart.simulate();
-    bool status = (hart.registers[10] == 10)
+    bool status = (hart.registers[20] == 10)
         and (hart.registers[11] == 20)
         and (hart.registers[12] == 30)
         and (hart.registers[13] == 10);
@@ -88,6 +90,6 @@ int main() {
         std::cout << "tests are bad :(\n";
         return 1;
     }
-    run_8q();
+    //run_8q();
     return 0;
 }

@@ -1,3 +1,6 @@
+#ifndef MASK_H
+#define MASK_H
+
 #include "instruction.hpp"
 #include <cstdint>
 
@@ -10,6 +13,9 @@ extern uint32_t mask[128];
 struct Decode {
     Instruction::executorT exec;
     void (*decod)(Instruction&, instT);
+    bool linear;
 };
 
 extern Decode decoders[(1<<18)-1];
+
+#endif // MASK_H
