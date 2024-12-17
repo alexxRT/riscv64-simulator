@@ -102,7 +102,7 @@ void construct_candidates(int a[], int k, int n, int c[], int *ncandidates) {
   }
 }
 
-int main() {
+int _start() {
   int a[NMAX]; /* solution vector */
   int i;       /* counter */
   int compare[] = {1, 0, 0, 2, 10, 4, 40, 92};
