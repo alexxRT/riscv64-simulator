@@ -54,16 +54,25 @@ _INSTR_(SRLI, I, {SET_REG(RD,
             ans = builder.CreateAShr(LGET(RS1), LC64(IMM&SIX_BITS));
         LSET(RD, ans);
 }) // TODO check for correctness // WARNING decoded same as SRAI
-_INSTR_(SLLIW, I, {SET_REG(RD, (uint32_t)REG(RS1) << (IMM & SIX_BITS))}, true, {}) // TODO check
+_INSTR_(SLLIW, I, {SET_REG(RD, (uint32_t)REG(RS1) << (IMM & SIX_BITS))}, true, {
+ LSET(RD, builder.CreateZExt( builder.CreateShl( builder.CreateTrunc( LGET(RS1), Type::getInt32PtrTy(ctx) ), LC64(IMM & SIX_BITS) ) , Type::getInt64PtrTy(ctx)));
+}) // TODO check
 _INSTR_(SRLIW, I, {SET_REG(RD,
                           !!(IMM & 1<<10)*((uint32_t)REG(RS1) >> (IMM & SIX_BITS)) // logical
                           |
                           !(IMM & 1<<10)*((int32_t)REG(RS1) >> (IMM & SIX_BITS)) // arithmetic
-)}, true, {}) // TODO check for correctness // WARNING decoded same as SRAIW
+)}, true, {
+        Value *ans=nullptr;
+        if (IMM & 1<<10)
+ ans = builder.CreateZExt( builder.CreateLShr( builder.CreateTrunc( LGET(RS1), Type::getInt32PtrTy(ctx)), LC64(IMM & SIX_BITS) ) , Type::getInt64PtrTy(ctx));
+        else
+ ans = builder.CreateZExt( builder.CreateAShr( builder.CreateTrunc( LGET(RS1), Type::getInt32PtrTy(ctx)), LC64(IMM & SIX_BITS) ) , Type::getInt64PtrTy(ctx));
+        LSET(RD, ans);
+    }) // TODO check for correctness // WARNING decoded same as SRAIW
 _INSTR_(LUI, U, { SET_REG(RD, (IMM&INSN_FIELD_IMM20)) }, true, { LSET(RD, LC64(IMM&INSN_FIELD_IMM20)); })
 _INSTR_(AUIPC, U,{ SET_REG(RD, (IMM + OPC)) }, true, {LSET(RD, builder.CreateAdd(LC64(IMM), LPC));}) 
 
-#define JIT_BIN_OP(name) LSET(RD, builder.CreateAdd(LGET(RS2), LGET(RS1)));
+#define JIT_BIN_OP(name) LSET(RD, builder.Create##name(LGET(RS1), LGET(RS2)));
 
 _INSTR_(ADD, R, {CODE_BIN_RU(+)}, true, { JIT_BIN_OP(Add) })
 _INSTR_(SLT, R, {CODE_BIN_RS(<)}, true, { JIT_BIN_OP(ICmpSLT) })
@@ -74,12 +83,23 @@ _INSTR_(XOR, R, {CODE_BIN_RU(^)}, true, { JIT_BIN_OP(Xor) })
 _INSTR_(SLL, R, {SET_REG(RD, REG(RS1) << (REG(RS2) & SIX_BITS))}, true, { LSET(RD, builder.CreateShl(LGET(RS1), builder.CreateAnd(LGET(RS2), LC64(SIX_BITS)))) }) // TODO check
 _INSTR_(SRL, R, {SET_REG(RD, (REG(RS1) >> (REG(RS2) & SIX_BITS)))}, true, { LSET(RD, builder.CreateLShr(LGET(RS1), builder.CreateAnd(LGET(RS2), LC64(SIX_BITS)))) }) // TODO check
 _INSTR_(SRA, R, {SET_REG(RD, ((int64_t)REG(RS1) >> (REG(RS2) & SIX_BITS)))}, true, { LSET(RD, builder.CreateAShr(LGET(RS1), builder.CreateAnd(LGET(RS2), LC64(SIX_BITS)))) }) // TODO check
-_INSTR_(SLLW, R, {SET_REG(RD, (uint32_t)REG(RS1) << (REG(RS2) & FIV_BITS))}, true, {}) // TODO check
-_INSTR_(SRLW, R, {SET_REG(RD, ((uint32_t)REG(RS1) >> (REG(RS2) & FIV_BITS)))}, true, {}) // TODO check
-_INSTR_(SRAW, R, {SET_REG(RD, ((int32_t)REG(RS1) >> (REG(RS2) & FIV_BITS)))}, true, {}) // TODO check
+_INSTR_(SLLW, R, {SET_REG(RD, (uint32_t)REG(RS1) << (REG(RS2) & FIV_BITS))}, true, {
+
+ LSET(RD, builder.CreateZExt( builder.CreateShl( builder.CreateTrunc( LGET(RS1), Type::getInt32PtrTy(ctx) ), builder.CreateAnd(LGET(RS2), LC64(FIV_BITS)) ) , Type::getInt64PtrTy(ctx)));
+}) // TODO check
+_INSTR_(SRLW, R, {SET_REG(RD, ((uint32_t)REG(RS1) >> (REG(RS2) & FIV_BITS)))}, true, {
+ LSET(RD, builder.CreateZExt( builder.CreateLShr( builder.CreateTrunc( LGET(RS1), Type::getInt32PtrTy(ctx) ), builder.CreateAnd(LGET(RS2), LC64(FIV_BITS)) ) , Type::getInt64PtrTy(ctx)));
+}) // TODO check
+_INSTR_(SRAW, R, {SET_REG(RD, ((int32_t)REG(RS1) >> (REG(RS2) & FIV_BITS)))}, true, {
+ LSET(RD, builder.CreateZExt( builder.CreateAShr( builder.CreateTrunc( LGET(RS1), Type::getInt32PtrTy(ctx) ), builder.CreateAnd(LGET(RS2), LC64(FIV_BITS)) ) , Type::getInt64PtrTy(ctx)));
+}) // TODO check
 _INSTR_(SUB, R, {CODE_BIN_RU(-)}, true, { JIT_BIN_OP(Sub) })
-_INSTR_(SUBW, R, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) - REG(RS2)))}, true, {}) // TODO check if it's correct but it should be nice
-_INSTR_(ADDW, R, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) + REG(RS2)))}, true, {}) // TODO check if it's correct but it should be nice
+_INSTR_(SUBW, R, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) - REG(RS2)))}, true, {
+ LSET(RD, builder.CreateSExt( builder.CreateSub( builder.CreateTrunc( LGET(RS1), Type::getInt32PtrTy(ctx) ), LGET(RS2)) , Type::getInt64PtrTy(ctx)));
+}) // TODO check if it's correct but it should be nice
+_INSTR_(ADDW, R, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) + REG(RS2)))}, true, {
+ LSET(RD, builder.CreateSExt( builder.CreateAdd( builder.CreateTrunc( LGET(RS1), Type::getInt32PtrTy(ctx) ), LGET(RS2)) , Type::getInt64PtrTy(ctx)));
+}) // TODO check if it's correct but it should be nice
 _INSTR_(JAL, J, { NEW_PC = OPC + IMM; SET_REG(RD, OPC + 4); }, false, { builder.CreateStore(new_pc, builder.CreateAdd(LPC, LC64(IMM))); LSET(RD, builder.CreateAdd(LPC, LC64(4)));  })
 _INSTR_(JALR, I, { NEW_PC = (IMM + REG(RS1)) & ~1ULL; SET_REG(RD, OPC + 4); }, false, { builder.CreateStore(new_pc, builder.CreateAnd( builder.CreateAdd(LGET(RS1), LC64(IMM)), LC64(~1ULL))); LSET(RD, builder.CreateAdd(LPC, LC64(4))); })
 
@@ -97,7 +117,9 @@ _INSTR_(BLT, B, {CODE_CJS(<)}, false, { JIT_COND_JMP(SLT) })
 _INSTR_(BLTU, B, {CODE_CJU(<)}, false, { JIT_COND_JMP(ULT) })
 _INSTR_(BGE, B, {CODE_CJS(>=)}, false, { JIT_COND_JMP(SGE) })
 _INSTR_(BGEU, B, {CODE_CJU(>=)}, false, { JIT_COND_JMP(UGE) })
-_INSTR_(ADDIW, I, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) + IMM))}, true, {}) // TODO check if it's correct but it should be nice
+_INSTR_(ADDIW, I, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) + IMM))}, true, {
+ LSET(RD, builder.CreateSExt( builder.CreateAdd( builder.CreateTrunc( LGET(RS1), Type::getInt32PtrTy(ctx) ), LC64(IMM)) , Type::getInt64PtrTy(ctx)));
+}) // TODO check if it's correct but it should be nice
 // TODO check type conversions
 _INSTR_(LD, I, { SET_REG(RD, *(uint64_t*)MEM(REG(RS1)+IMM)); }, false, {
     LSET(RD, builder.CreateLoad(Type::getInt64PtrTy(ctx), builder.CreateGEP(Type::getInt8PtrTy(ctx), mem, builder.CreateAdd(LGET(RS1), LC64(IMM)))));
