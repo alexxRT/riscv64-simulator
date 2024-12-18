@@ -13,6 +13,8 @@
 #define DEB(x) 
 #endif
 
+#define fprintf(...)
+
 const int REGISTERS_NUM = 32;
 
 enum class EXECUTE_STATUS : int {
@@ -34,6 +36,8 @@ public:
     ssize_t new_pc;
     std::array<regT, REGISTERS_NUM> registers;
     uint8_t *memory;
+    bool done = false;
+    size_t ins = 0;
 
     Hart() : registers({}), pc(0), memory(nullptr) { }
 
@@ -49,7 +53,8 @@ public:
         EXECUTE_STATUS status = EXECUTE_STATUS::SUCCESS;
         // execute
         Instruction *decoded = new Instruction(0, nullptr);
-        while (true) {
+        while (!done) {
+            ins++;
             DEB("decoding at pc=" << pc);
             auto dec_s = decode(*(uint32_t*)(memory+pc), decoded);
             DEB("decoded");
@@ -81,12 +86,21 @@ public:
             return EXIT;
         }
 
+        fprintf(stderr, "decoder: instr %x\n", instruction);
+
         uint32_t fingerprint = instruction & mask[instruction & 127];
+        fprintf(stderr, "decoder: mask=%x, fingerprint=%x\n", mask[instruction & 127], fingerprint);
+
+        // (-1931ULL);
         fingerprint = FP_HASH(fingerprint);
 
         auto dec = decoders[fingerprint];
         dec.decod(*ptr, instruction);
         ptr->execute = dec.exec;
+
+        fprintf(stderr, "decoded: instr_code=%u, rs1=%hhu, rs2=%hhu, rd=%hhu, imm=%ld, execute=%p\n", 
+            ptr->instr_code, ptr->rs1, ptr->rs2, ptr->rd, ptr->imm, ptr->execute);
+
         return OK;
     }
 };

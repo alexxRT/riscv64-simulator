@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <vector>
 
+#include <chrono>
+
 bool test_fib_imm() {
     // fibonacci
     /*
@@ -78,7 +80,9 @@ void run_8q() {
         std::cout << "load err: " << int(read_st) << '\n';
         return;
     }
+    // fprintf(stderr, "vmem = %p\n", reader.vmem());
     hart.simulate();
+    std::cout << "i:" << hart.ins<<'\n';
 }
 
 int main() {
@@ -88,6 +92,16 @@ int main() {
         std::cout << "tests are bad :(\n";
         return 1;
     }
+
+    auto start = std::chrono::steady_clock::now();
+
     run_8q();
+
+    // Stop measuring time
+    auto end = std::chrono::steady_clock::now();
+
+    // Calculate elapsed time in milliseconds
+    std::chrono::duration<double, std::milli> elapsed = end - start;
+    std::cout << "Time taken: " << elapsed.count() << " ms" << std::endl;
     return 0;
 }

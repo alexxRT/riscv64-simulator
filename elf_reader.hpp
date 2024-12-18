@@ -12,8 +12,10 @@ enum class ReaderStatus : int {
     BAD_ALLOC = 4
 };
 
-const size_t process_stack_size = 8 * 1024 * 1024;
+const size_t process_stack_size = 180 * 1024 * 1024;
+
 const size_t sp_reg_number = 2;
+const size_t ra_reg_number = 1;
 
 class ElfReader {
     public:
@@ -41,7 +43,9 @@ class ElfReader {
                 return ReaderStatus::BAD_SEGMENT;
             }
 
-            uint64_t vmem_max_addr = max_vaddr_ + 1 + process_stack_size;
+            uint64_t vmem_stack_addr = max_vaddr_ + 1 + process_stack_size;
+            uint64_t vmem_fin_ecall_addr = vmem_stack_addr + 1;
+            uint64_t vmem_max_addr = vmem_fin_ecall_addr + 4; // for exit syscall
             size_t vmem_size = vmem_max_addr + 1;
 
             vmem_ = new uint8_t[vmem_size];
@@ -63,9 +67,12 @@ class ElfReader {
             }
 
             hart.pc = reader.get_entry();
+ 
+            *(uint32_t*)(vmem_ + vmem_fin_ecall_addr) = 0x00000073; // ecall
 
             hart.memory = vmem_;
-            hart.registers[sp_reg_number] = vmem_max_addr;
+            hart.registers[sp_reg_number] = vmem_stack_addr;
+            hart.registers[ra_reg_number] = vmem_fin_ecall_addr;
 
             return ReaderStatus::SUCCESS;
         }
