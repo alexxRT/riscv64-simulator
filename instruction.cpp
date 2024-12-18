@@ -37,8 +37,8 @@ void decode_instruction_U(Instruction &ins, instT code) {
 
 void decode_instruction_J(Instruction &ins, instT code) {
     DEB("decs J");
-    SIGN_INIT
-    ins.imm = ((code & INSN_FIELD_ZIMM10) >> 20)
+    SIGN_INIT RD_INIT
+    ins.imm = ((code & 0x7ff00000) >> 20) & ~1ULL
         | ((code & (1<<20)) >> 9)
         | ((code & (0xff000)))
         | (sign * SIGNN(20));
@@ -57,4 +57,3 @@ void exec_##name(Hart *heart, const Instruction &instr) { \
 #undef _INSTR_
 
 };
-
