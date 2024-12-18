@@ -64,6 +64,8 @@ __attribute__((noinline)) void exec_##name(Hart *heart, const Instruction &instr
 
 #include "instrs.h"
 #undef _INSTR_
+#undef EXEC_RET_false
+#undef EXEC_RET_true
 
 };
 
@@ -77,11 +79,15 @@ using llvm::Value;
 using llvm::BasicBlock;
 using llvm::Function;
 
+#define EXEC_RET_true  
+#define EXEC_RET_false builder.CreateRetVoid();
+
 #define _INSTR_(name, type, code, linear, jit) \
-void jit_##name(Instruction &instr, llvm::IRBuilder<> &builder, llvm::LLVMContext &ctx, Value* regs, Value *mem, Value *pc, Value *new_pc, Function *fn) { \
+void jit_##name(Instruction &instr, llvm::IRBuilder<> &builder, llvm::LLVMContext &ctx, Value* regs, Value *mem, Value *pc, Value *new_pc, Function *fn, Value *done) { \
     builder.CreateStore(builder.CreateAdd(builder.CreateLoad(Type::getInt64Ty(ctx), pc), builder.getInt64(4)), new_pc); \
     jit  \
     builder.CreateStore(builder.CreateLoad(Type::getInt64Ty(ctx), new_pc), pc); \
+    EXEC_RET_##linear \
 }
 
 #include "instrs.h"

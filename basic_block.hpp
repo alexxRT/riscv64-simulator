@@ -18,7 +18,7 @@ const size_t BB_arr_mask = (1<<17)-1; // TODO it's 90MB, maybe more?
 
 class RVBasicBlock {
 public:
-    typedef void (*BBFType)(uint64_t *regs, uint8_t *mem, size_t *pc);
+    typedef void (*BBFType)(uint64_t *regs, uint8_t *mem, size_t *pc, bool *done);
     size_t addr;
     BBFType jitted;
     Instruction instrs[BB_len+1]; // +1 is reserved for empty

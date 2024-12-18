@@ -78,7 +78,6 @@ builder.SetInsertPoint(trueBr); \
 builder.CreateStore(builder.CreateAdd(builder.CreateLoad(Type::getInt64Ty(ctx), pc), LC64(IMM)), new_pc); \
 builder.CreateBr(retBr); \
 builder.SetInsertPoint(retBr); \
-builder.CreateRetVoid(); \
 })
 _INSTR_(BLTU, B, {CODE_CJU(<)}, false, {})
 _INSTR_(BGE, B, {CODE_CJS(>=)}, false, {})
@@ -96,4 +95,4 @@ _INSTR_(SD, S, { *(uint64_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {})
 _INSTR_(SW, S, { *(uint32_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {})
 _INSTR_(SH, S, { *(uint16_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {})
 _INSTR_(SB, S, { *(uint8_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {})
-_INSTR_(ECALL, I, {printf("Ecall or ebreak: doing exit...\n"); heart->done = true;}, false, {}) // WARNING same as ebreak // TODO add actuall functionality
+_INSTR_(ECALL, I, {printf("Ecall or ebreak: doing exit...\n"); heart->done = true;}, false, { builder.CreateStore(builder.getInt1(true), done); }) // WARNING same as ebreak // TODO add actuall functionality

@@ -19,7 +19,7 @@ struct Decode {
     void (*decod)(Instruction&, instT);
     bool linear;
     void (*jit)(Instruction &, llvm::IRBuilder<> &, llvm::LLVMContext &, llvm::Value* , 
-                llvm::Value *, llvm::Value *, llvm::Value *new_pc, llvm::Function *fn);
+                llvm::Value *, llvm::Value *, llvm::Value *new_pc, llvm::Function *fn, llvm::Value *done);
 };
 
 extern Decode decoders[(1<<18)-1];
