@@ -1,6 +1,6 @@
 CC = clang++
 INCLUDE = -I../ELFIOgit
-CFLAGS = -Wno-initializer-overrides -Wno-c99-designator -O3 $(INCLUDE)
+CFLAGS = -Wno-initializer-overrides -Wno-c99-designator -O3 $(INCLUDE) `llvm-config --cppflags --ldflags --libs` 
 BUILDDIR = build
 
 XCC = $(shell ./detect_xcompiler.sh)

@@ -3,6 +3,7 @@
 
 #include "instruction.hpp"
 #include <cstdint>
+#include <llvm-16/llvm/IR/IRBuilder.h>
 
 #define FP_HASH(x) ((x) & INSN_FIELD_OPCODE) \
                 | (((x) & INSN_FIELD_FUNCT3) >> 5) \
@@ -14,6 +15,7 @@ struct Decode {
     Instruction::executorT exec;
     void (*decod)(Instruction&, instT);
     bool linear;
+    void (*jit)(Instruction&, llvm::IRBuilder<>&);
 };
 
 extern Decode decoders[(1<<18)-1];

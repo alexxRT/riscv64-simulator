@@ -5,6 +5,8 @@
 #include <cstdint>
 #include <iostream>
 #include <functional>
+#include <llvm-16/llvm/IR/IRBuilder.h>
+#include <llvm-16/llvm/IR/Value.h>
 #include "encoding.out.h"
 
 #define RD_SHIFT 7
@@ -55,8 +57,22 @@ namespace Executors {
 void empty_executor(Hart *heart, const Instruction &instr); // for basic blocks
 
 
-#define _INSTR_(name, type, code, linear) \
+#define _INSTR_(name, type, code, linear, jit) \
 void exec_##name(Hart *heart, const Instruction &instr);
+
+#include "instrs.h"
+#undef _INSTR_
+
+};
+
+namespace Jiters {
+void empty_jiter(Instruction &instr, llvm::IRBuilder<> &builder); // for basic blocks
+
+using llvm::Type;
+using llvm::Value;
+
+#define _INSTR_(name, type, code, linear, jit) \
+void jit_##name(Instruction &instr, llvm::IRBuilder<> &builder, llvm::LLVMContext &ctx, Value* regs, Value *mem, Value *pc, Value *new_pc);
 
 #include "instrs.h"
 #undef _INSTR_
