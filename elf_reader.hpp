@@ -12,6 +12,9 @@ enum class ReaderStatus : int {
     BAD_ALLOC = 4
 };
 
+const size_t process_stack_size = 8 * 1024 * 1024;
+const size_t sp_reg_number = 2;
+
 class ElfReader {
     public:
         ElfReader(std::string filename): reader(), vmem_(nullptr), file_loaded_(false), max_vaddr_(0) {
@@ -38,7 +41,10 @@ class ElfReader {
                 return ReaderStatus::BAD_SEGMENT;
             }
 
-            vmem_ = new uint8_t[max_vaddr_ + 1];
+            uint64_t vmem_max_addr = max_vaddr_ + 1 + process_stack_size;
+            size_t vmem_size = vmem_max_addr + 1;
+
+            vmem_ = new uint8_t[vmem_size];
             if (!vmem_) {
                 return ReaderStatus::BAD_ALLOC;
             }
@@ -52,8 +58,6 @@ class ElfReader {
 
                     if (data) {
                         std::memcpy(&(vmem_[segment_start]), data, segment_size);
-                    } else { // e.g. .sbss section
-                        std::memset(&(vmem_[segment_start]), 0, segment_size);
                     }
                 }
             }
@@ -61,6 +65,8 @@ class ElfReader {
             hart.pc = reader.get_entry();
 
             hart.memory = vmem_;
+            hart.registers[sp_reg_number] = vmem_max_addr;
+
             return ReaderStatus::SUCCESS;
         }
 
