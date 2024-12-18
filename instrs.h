@@ -162,15 +162,15 @@ _INSTR_(LBU, I, { SET_REG(RD, *(uint8_t*)MEM(REG(RS1)+IMM)); }, false, {
     ));
 })
 _INSTR_(SD, S, { *(uint64_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {
-    builder.CreateStore(LGET(RS2), builder.CreateAdd(LGET(RS1), LC64(IMM)));
+    builder.CreateStore(LGET(RS2), builder.CreateGEP(Type::getInt8PtrTy(ctx), mem, builder.CreateAdd(LGET(RS1), LC64(IMM))));
 })
 _INSTR_(SW, S, { *(uint32_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {
-    builder.CreateStore( builder.CreateTrunc(LGET(RS2), Type::getInt32PtrTy(ctx)), builder.CreateAdd(LGET(RS1), LC64(IMM)));
+    builder.CreateStore( builder.CreateTrunc(LGET(RS2), Type::getInt32PtrTy(ctx)), builder.CreateGEP(Type::getInt8PtrTy(ctx), mem, builder.CreateAdd(LGET(RS1), LC64(IMM))));
 })
 _INSTR_(SH, S, { *(uint16_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {
-    builder.CreateStore( builder.CreateTrunc(LGET(RS2), Type::getInt16PtrTy(ctx)), builder.CreateAdd(LGET(RS1), LC64(IMM)));
+    builder.CreateStore( builder.CreateTrunc(LGET(RS2), Type::getInt16PtrTy(ctx)), builder.CreateGEP(Type::getInt8PtrTy(ctx), mem, builder.CreateAdd(LGET(RS1), LC64(IMM))));
 })
 _INSTR_(SB, S, { *(uint8_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {
-    builder.CreateStore( builder.CreateTrunc(LGET(RS2), Type::getInt8PtrTy(ctx)), builder.CreateAdd(LGET(RS1), LC64(IMM)));
+    builder.CreateStore( builder.CreateTrunc(LGET(RS2), Type::getInt8PtrTy(ctx)), builder.CreateGEP(Type::getInt8PtrTy(ctx), mem, builder.CreateAdd(LGET(RS1), LC64(IMM))));
 })
 _INSTR_(ECALL, I, {printf("Ecall or ebreak: doing exit...\n"); heart->done = true;}, false, { builder.CreateStore(builder.getInt1(true), done); }) // WARNING same as ebreak // TODO add actuall functionality
