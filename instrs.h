@@ -26,7 +26,7 @@
 
 _INSTR_(SLTI, I, {CODE_BIN_IS(<)})
 _INSTR_(SLTIU, I, {CODE_BIN_IU(<)})
-_INSTR_(ADDI, I, {CODE_BIN_IU(+)})
+_INSTR_(ADDI, I, {CODE_BIN_IU(+); fprintf(stderr, "ADDI\n"); })
 _INSTR_(ANDI, I, {CODE_BIN_IU(&)})
 _INSTR_(ORI, I, {CODE_BIN_IU(|)})
 _INSTR_(XORI, I, {CODE_BIN_IU(^)})
@@ -43,7 +43,7 @@ _INSTR_(SRLIW, I, {SET_REG(RD,
                           !(IMM & 1<<10)*((int32_t)REG(RS1) >> (IMM & SIX_BITS)) // arithmetic
 )}) // TODO check for correctness // WARNING decoded same as SRAIW
 _INSTR_(LUI, U, { SET_REG(RD, (IMM&INSN_FIELD_IMM20)) })
-_INSTR_(AUIPC, U,{ SET_REG(RD, (IMM + PC)) }) 
+_INSTR_(AUIPC, U,{ SET_REG(RD, (IMM + PC)) })
 _INSTR_(ADD, R, {CODE_BIN_RU(+)})
 _INSTR_(SLT, R, {CODE_BIN_RS(<)})
 _INSTR_(SLTU, R, {CODE_BIN_RU(<)})
@@ -60,7 +60,7 @@ _INSTR_(SUB, R, {CODE_BIN_RU(-)})
 _INSTR_(SUBW, R, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) - REG(RS2)))}) // TODO check if it's correct but it should be nice
 _INSTR_(ADDW, R, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) + REG(RS2)))}) // TODO check if it's correct but it should be nice
 _INSTR_(JAL, J, { NEW_PC = PC + IMM; SET_REG(RD, PC + 4); })
-_INSTR_(JALR, I, { NEW_PC = (IMM + REG(RS1)) & ~1ULL; SET_REG(RD, PC + 4); })
+_INSTR_(JALR, I, { fprintf(stderr, "pc %x rs1 %u regrs %x\n", PC, RS1, REG(RS1)); NEW_PC = (IMM + REG(RS1)) & ~1ULL; SET_REG(RD, PC + 4); })
 _INSTR_(BEQ, B, {CODE_CJU(==)})
 _INSTR_(BNE, B, {CODE_CJU(!=)})
 _INSTR_(BLT, B, {CODE_CJS(<)})
@@ -69,14 +69,15 @@ _INSTR_(BGE, B, {CODE_CJS(>=)})
 _INSTR_(BGEU, B, {CODE_CJU(>=)})
 _INSTR_(ADDIW, I, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) + IMM))}) // TODO check if it's correct but it should be nice
 // TODO check type conversions
-_INSTR_(LD, I, { SET_REG(RD, *(uint64_t*)MEM(REG(RS1)+IMM)); })
+_INSTR_(LD, I, { fprintf(stderr, "ld %d %llu\n", RD, *(uint64_t*)MEM(REG(RS1)+IMM)); SET_REG(RD, *(uint64_t*)MEM(REG(RS1)+IMM));  fprintf(stderr, "ld %d %llu\n", RD, REG(RD));})
 _INSTR_(LW, I, { SET_REG(RD, *(int32_t*)MEM(REG(RS1)+IMM)); })
 _INSTR_(LWU, I, { SET_REG(RD, *(uint32_t*)MEM(REG(RS1)+IMM)); })
 _INSTR_(LH, I, { SET_REG(RD, *(int16_t*)MEM(REG(RS1)+IMM)); })
 _INSTR_(LHU, I, { SET_REG(RD, *(uint16_t*)MEM(REG(RS1)+IMM)); })
 _INSTR_(LB, I, { SET_REG(RD, *(int8_t*)MEM(REG(RS1)+IMM)); })
 _INSTR_(LBU, I, { SET_REG(RD, *(uint8_t*)MEM(REG(RS1)+IMM)); })
-_INSTR_(SD, S, { *(uint64_t*)MEM(REG(RS1)+IMM) = REG(RS2); })
+_INSTR_(SD, S, { fprintf(stderr, "sd %d\n", REG(RS2)); *(uint64_t*)MEM(REG(RS1)+IMM) = REG(RS2); fprintf(stderr, "SD: %p <- %lu, basereg = %hhu (val = %p)\n", (void*)(MEM(REG(RS1)+IMM)), REG(RS2), RS1, (void*)REG(RS1)); })
 _INSTR_(SW, S, { *(uint32_t*)MEM(REG(RS1)+IMM) = REG(RS2); })
 _INSTR_(SH, S, { *(uint16_t*)MEM(REG(RS1)+IMM) = REG(RS2); })
 _INSTR_(SB, S, { *(uint8_t*)MEM(REG(RS1)+IMM) = REG(RS2); })
+_INSTR_(ECALL, I, {printf("Ecall or ebreak: doing exit...\n"); heart->done = true; }) // WARNING same as ebreak // TODO add actuall functionality

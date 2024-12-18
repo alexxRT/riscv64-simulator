@@ -46,6 +46,7 @@ void decode_instruction_J(Instruction &ins, instT code) {
 
 namespace Executors {
 void empty_executor(Hart *hart, const Instruction &instr) {} // example
+#define fprintf(...)
 
 
 #define _INSTR_(name, type, code) \
