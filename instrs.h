@@ -14,7 +14,7 @@
 #define LGET(reg) ( builder.CreateLoad(Type::getInt64Ty(ctx), \
     builder.CreateConstGEP1_64(Type::getInt64PtrTy(ctx), regs, reg) ) )
 
-#define LSET(reg, val) builder.CreateStore(val, Type::getInt64Ty(ctx), \
+#define LSET(reg, val) builder.CreateStore(val,  \
     builder.CreateConstGEP1_64(Type::getInt64PtrTy(ctx), regs, reg));
 
 #define LC64(num) builder.getInt64(num)
@@ -33,7 +33,7 @@
 
 _INSTR_(SLTI, I, {CODE_BIN_IS(<)}, true, {})
 _INSTR_(SLTIU, I, {CODE_BIN_IU(<)}, true, {})
-_INSTR_(ADDI, I, {CODE_BIN_IU(+)}, true, { LSET(RD, LC64(IMM) + LGET(RS1)); })
+_INSTR_(ADDI, I, {CODE_BIN_IU(+)}, true, { LSET(RD, builder.CreateAdd(LC64(IMM), LGET(RS1))); })
 _INSTR_(ANDI, I, {CODE_BIN_IU(&)}, true, {})
 _INSTR_(ORI, I, {CODE_BIN_IU(|)}, true, {})
 _INSTR_(XORI, I, {CODE_BIN_IU(^)}, true, {})
@@ -51,7 +51,7 @@ _INSTR_(SRLIW, I, {SET_REG(RD,
 )}, true, {}) // TODO check for correctness // WARNING decoded same as SRAIW
 _INSTR_(LUI, U, { SET_REG(RD, (IMM&INSN_FIELD_IMM20)) }, true, {})
 _INSTR_(AUIPC, U,{ SET_REG(RD, (IMM + OPC)) }, true, {}) 
-_INSTR_(ADD, R, {CODE_BIN_RU(+)}, true, { LSET(RD, LGET(RS2) + LGET(RS1)); })
+_INSTR_(ADD, R, {CODE_BIN_RU(+)}, true, { LSET(RD, builder.CreateAdd(LGET(RS2), LGET(RS1))); })
 _INSTR_(SLT, R, {CODE_BIN_RS(<)}, true, {})
 _INSTR_(SLTU, R, {CODE_BIN_RU(<)}, true, {})
 _INSTR_(AND, R, {CODE_BIN_RU(&)}, true, {})
@@ -70,15 +70,15 @@ _INSTR_(JAL, J, { NEW_PC = OPC + IMM; SET_REG(RD, OPC + 4); }, false, {})
 _INSTR_(JALR, I, { NEW_PC = (IMM + REG(RS1)) & ~1ULL; SET_REG(RD, OPC + 4); }, false, {})
 _INSTR_(BEQ, B, {CODE_CJU(==)}, false, {})
 _INSTR_(BNE, B, {CODE_CJU(!=)}, false, {})
-_INSTR_(BLT, B, {CODE_CJS(<)}, false, {
-Value *trueBr = BasicBlock::Create(ctx, "", jit_fun);
-Value *retBr = BasicBlock::Create(ctx, "", jit_fun);
-builder.CreateICmpSLT(LGET(RS1), LGET(RS2), trueBr, retBr);
-builder.SetInsertPoint(trueBr);
-builder.CreateStore(builder.CreateAdd(builder.CreateLoad(Type::getInt64Ty(ctx), pc) Lc64(IMM)), new_pc);
-builder.CreateBr(falseBr);
-builder.SetInsertPoint(falseBr);
-builder.CreateRetVoid();
+_INSTR_(BLT, B, {CODE_CJS(<)}, false, { \
+BasicBlock *trueBr = BasicBlock::Create(ctx, "", fn); \
+BasicBlock *retBr = BasicBlock::Create(ctx, "", fn); \
+builder.CreateCondBr(builder.CreateICmpSLT(LGET(RS1), LGET(RS2)), trueBr, retBr); \
+builder.SetInsertPoint(trueBr); \
+builder.CreateStore(builder.CreateAdd(builder.CreateLoad(Type::getInt64Ty(ctx), pc), LC64(IMM)), new_pc); \
+builder.CreateBr(retBr); \
+builder.SetInsertPoint(retBr); \
+builder.CreateRetVoid(); \
 })
 _INSTR_(BLTU, B, {CODE_CJU(<)}, false, {})
 _INSTR_(BGE, B, {CODE_CJS(>=)}, false, {})

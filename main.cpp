@@ -1,6 +1,7 @@
 //#define DEBUG
 
 #include "hart.hpp"
+#include "basic_block.hpp"
 #include "elf_reader.hpp"
 
 #include <cstdint>
@@ -84,6 +85,7 @@ void run_8q() {
 }
 
 int main() {
+    RVBasicBlock::init();
     if (test_fib_imm() and test_elf_reader())
         std::cout << "tests are OK!\n";
     else {

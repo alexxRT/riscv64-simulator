@@ -13,6 +13,10 @@ using namespace llvm::orc;
 
 RVBasicBlock bbs_arr[BB_arr_mask+1] = {};
 
+static llvm::Expected<std::unique_ptr<llvm::orc::LLJIT>> jit = nullptr;
+static llvm::LLVMContext ctx;
+static llvm::FunctionType *jit_ft;
+
 void RVBasicBlock::init() {
     InitializeNativeTarget();
     InitializeNativeTargetAsmPrinter();
@@ -77,7 +81,7 @@ size_t RVBasicBlock::do_jit(const instT *arr) {
         auto dec = decoders[fingerprint];
         DEB("decoding..");
         dec.decod(instrs[i], instruction);
-        dec.jit(instrs[i], builder);
+        dec.jit(instrs[i], builder, ctx, regs, mem, pc, new_pc, fn);
         if (!dec.linear) {
             len = i + 1;
             break;
@@ -88,6 +92,7 @@ size_t RVBasicBlock::do_jit(const instT *arr) {
         instrs[BB_len].execute = Executors::empty_executor;
         len = BB_len+1;
     }
+    module->print(outs(), nullptr);
     if (auto err = jit->get()->addIRModule(ThreadSafeModule(std::move(module), std::make_unique<LLVMContext>()))) {
         std::cerr << "Failed to add module to LLJIT: " << toString(std::move(err)) << std::endl;
         return 1;
@@ -101,6 +106,6 @@ size_t RVBasicBlock::do_jit(const instT *arr) {
     }
 
     // Cast the symbol's address to a function pointer and call it.
-    BBFType jit_func = jit_func_sym->toPtr<BBFType>();
+    jitted = jit_func_sym->toPtr<BBFType>();
     return BB_len+1;
 }

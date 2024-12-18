@@ -11,7 +11,7 @@ uint32_t mask[128] = {
 
 
 Decode decoders[(1<<18)-1] = {
-#define _INSTR_(name, type, code, linear, jit) [FP_HASH(MATCH_##name)] = {Executors::exec_##name, decode_instruction_##type, linear, jit},
+#define _INSTR_(name, type, code, linear, jit) [FP_HASH(MATCH_##name)] = {Executors::exec_##name, decode_instruction_##type, linear, Jiters::jit_##name},
 #include "instrs.h"
 #undef _INSTR_
 };

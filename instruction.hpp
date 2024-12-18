@@ -5,6 +5,7 @@
 #include <cstdint>
 #include <iostream>
 #include <functional>
+#include <llvm-16/llvm/IR/Function.h>
 #include <llvm-16/llvm/IR/IRBuilder.h>
 #include <llvm-16/llvm/IR/Value.h>
 #include "encoding.out.h"
@@ -70,9 +71,10 @@ void empty_jiter(Instruction &instr, llvm::IRBuilder<> &builder); // for basic b
 
 using llvm::Type;
 using llvm::Value;
+using llvm::Function;
 
 #define _INSTR_(name, type, code, linear, jit) \
-void jit_##name(Instruction &instr, llvm::IRBuilder<> &builder, llvm::LLVMContext &ctx, Value* regs, Value *mem, Value *pc, Value *new_pc);
+void jit_##name(Instruction &instr, llvm::IRBuilder<> &builder, llvm::LLVMContext &ctx, Value* regs, Value *mem, Value *pc, Value *new_pc, Function *fn);
 
 #include "instrs.h"
 #undef _INSTR_

@@ -1,5 +1,6 @@
 #include "instruction.hpp"
 #include "hart.hpp"
+#include <llvm-16/llvm/IR/Function.h>
 #include <llvm-16/llvm/IR/IRBuilder.h>
 
 void decode_instruction_R(Instruction &ins, instT code) {
@@ -73,11 +74,14 @@ void empty_jiter(Instruction &instr, llvm::IRBuilder<> &builder) {
 
 using llvm::Type;
 using llvm::Value;
+using llvm::BasicBlock;
+using llvm::Function;
 
 #define _INSTR_(name, type, code, linear, jit) \
-void jit_##name(Instruction &instr, llvm::IRBuilder<> &builder, llvm::LLVMContext &ctx, Value* regs, Value *mem, Value *pc, Value *new_pc) { \
+void jit_##name(Instruction &instr, llvm::IRBuilder<> &builder, llvm::LLVMContext &ctx, Value* regs, Value *mem, Value *pc, Value *new_pc, Function *fn) { \
+    builder.CreateStore(builder.CreateAdd(builder.CreateLoad(Type::getInt64Ty(ctx), pc), builder.getInt64(4)), new_pc); \
     jit  \
-builder.CreateStore(builder.CreateAdd(builder.CreateLoad(Type::getInt64Ty(ctx), pc), builder.getInt64(4)), new_pc); \
+    builder.CreateStore(builder.CreateLoad(Type::getInt64Ty(ctx), new_pc), pc); \
 }
 
 #include "instrs.h"

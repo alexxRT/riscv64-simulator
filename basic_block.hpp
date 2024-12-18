@@ -20,6 +20,7 @@ class RVBasicBlock {
 public:
     typedef void (*BBFType)(uint64_t *regs, uint8_t *mem, size_t *pc);
     size_t addr;
+    BBFType jitted;
     Instruction instrs[BB_len+1]; // +1 is reserved for empty
     uint8_t len;
 
@@ -27,9 +28,6 @@ public:
     size_t construct(const instT *arr);
     size_t do_jit(const instT *arr);
 
-    static llvm::Expected<std::unique_ptr<llvm::orc::LLJIT>> jit;
-    static llvm::LLVMContext ctx;
-    static llvm::FunctionType *jit_ft;
 //    static llvm::Type *ptrType;
 };
 
