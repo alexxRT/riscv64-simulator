@@ -46,7 +46,14 @@ _INSTR_(SRLI, I, {SET_REG(RD,
                           !!(IMM & 1<<10)*(REG(RS1) >> (IMM & SIX_BITS)) // logical
                           |
                           !(IMM & 1<<10)*((int64_t)REG(RS1) >> (IMM & SIX_BITS)) // arithmetic
-)}, true, {}) // TODO check for correctness // WARNING decoded same as SRAI
+)}, true, { 
+        Value *ans=nullptr;
+        if (IMM & 1<<10)
+            ans = builder.CreateLShr(LGET(RS1), LC64(IMM&SIX_BITS));
+        else
+            ans = builder.CreateAShr(LGET(RS1), LC64(IMM&SIX_BITS));
+        LSET(RD, ans);
+}) // TODO check for correctness // WARNING decoded same as SRAI
 _INSTR_(SLLIW, I, {SET_REG(RD, (uint32_t)REG(RS1) << (IMM & SIX_BITS))}, true, {}) // TODO check
 _INSTR_(SRLIW, I, {SET_REG(RD,
                           !!(IMM & 1<<10)*((uint32_t)REG(RS1) >> (IMM & SIX_BITS)) // logical
@@ -92,15 +99,56 @@ _INSTR_(BGE, B, {CODE_CJS(>=)}, false, { JIT_COND_JMP(SGE) })
 _INSTR_(BGEU, B, {CODE_CJU(>=)}, false, { JIT_COND_JMP(UGE) })
 _INSTR_(ADDIW, I, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) + IMM))}, true, {}) // TODO check if it's correct but it should be nice
 // TODO check type conversions
-_INSTR_(LD, I, { SET_REG(RD, *(uint64_t*)MEM(REG(RS1)+IMM)); }, false, {})
-_INSTR_(LW, I, { SET_REG(RD, *(int32_t*)MEM(REG(RS1)+IMM)); }, false, {})
-_INSTR_(LWU, I, { SET_REG(RD, *(uint32_t*)MEM(REG(RS1)+IMM)); }, false, {})
-_INSTR_(LH, I, { SET_REG(RD, *(int16_t*)MEM(REG(RS1)+IMM)); }, false, {})
-_INSTR_(LHU, I, { SET_REG(RD, *(uint16_t*)MEM(REG(RS1)+IMM)); }, false, {})
-_INSTR_(LB, I, { SET_REG(RD, *(int8_t*)MEM(REG(RS1)+IMM)); }, false, {})
-_INSTR_(LBU, I, { SET_REG(RD, *(uint8_t*)MEM(REG(RS1)+IMM)); }, false, {})
-_INSTR_(SD, S, { *(uint64_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {})
-_INSTR_(SW, S, { *(uint32_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {})
-_INSTR_(SH, S, { *(uint16_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {})
-_INSTR_(SB, S, { *(uint8_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {})
+_INSTR_(LD, I, { SET_REG(RD, *(uint64_t*)MEM(REG(RS1)+IMM)); }, false, {
+    LSET(RD, builder.CreateLoad(Type::getInt64PtrTy(ctx), builder.CreateGEP(Type::getInt8PtrTy(ctx), mem, builder.CreateAdd(LGET(RS1), LC64(IMM)))));
+})
+
+_INSTR_(LW, I, { SET_REG(RD, *(int32_t*)MEM(REG(RS1)+IMM)); }, false, {
+    LSET(RD, builder.CreateSExt(
+        builder.CreateLoad(Type::getInt32PtrTy(ctx), builder.CreateGEP(Type::getInt8PtrTy(ctx), mem, builder.CreateAdd(LGET(RS1), LC64(IMM)))),
+        Type::getInt64PtrTy(ctx)
+    ));
+})
+_INSTR_(LWU, I, { SET_REG(RD, *(uint32_t*)MEM(REG(RS1)+IMM)); }, false, {
+    LSET(RD, builder.CreateZExt(
+        builder.CreateLoad(Type::getInt32PtrTy(ctx), builder.CreateGEP(Type::getInt8PtrTy(ctx), mem, builder.CreateAdd(LGET(RS1), LC64(IMM)))),
+        Type::getInt64PtrTy(ctx)
+    ));
+})
+_INSTR_(LH, I, { SET_REG(RD, *(int16_t*)MEM(REG(RS1)+IMM)); }, false, {
+    LSET(RD, builder.CreateSExt(
+        builder.CreateLoad(Type::getInt16PtrTy(ctx), builder.CreateGEP(Type::getInt8PtrTy(ctx), mem, builder.CreateAdd(LGET(RS1), LC64(IMM)))),
+        Type::getInt64PtrTy(ctx)
+    ));
+})
+_INSTR_(LHU, I, { SET_REG(RD, *(uint16_t*)MEM(REG(RS1)+IMM)); }, false, {
+    LSET(RD, builder.CreateZExt(
+        builder.CreateLoad(Type::getInt16PtrTy(ctx), builder.CreateGEP(Type::getInt8PtrTy(ctx), mem, builder.CreateAdd(LGET(RS1), LC64(IMM)))),
+        Type::getInt64PtrTy(ctx)
+    ));
+})
+_INSTR_(LB, I, { SET_REG(RD, *(int8_t*)MEM(REG(RS1)+IMM)); }, false, {
+    LSET(RD, builder.CreateSExt(
+        builder.CreateLoad(Type::getInt8PtrTy(ctx), builder.CreateGEP(Type::getInt8PtrTy(ctx), mem, builder.CreateAdd(LGET(RS1), LC64(IMM)))),
+        Type::getInt64PtrTy(ctx)
+    ));
+})
+_INSTR_(LBU, I, { SET_REG(RD, *(uint8_t*)MEM(REG(RS1)+IMM)); }, false, {
+    LSET(RD, builder.CreateZExt(
+        builder.CreateLoad(Type::getInt8PtrTy(ctx), builder.CreateGEP(Type::getInt8PtrTy(ctx), mem, builder.CreateAdd(LGET(RS1), LC64(IMM)))),
+        Type::getInt64PtrTy(ctx)
+    ));
+})
+_INSTR_(SD, S, { *(uint64_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {
+    builder.CreateStore(LGET(RS2), builder.CreateAdd(LGET(RS1), LC64(IMM)));
+})
+_INSTR_(SW, S, { *(uint32_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {
+    builder.CreateStore( builder.CreateTrunc(LGET(RS2), Type::getInt32PtrTy(ctx)), builder.CreateAdd(LGET(RS1), LC64(IMM)));
+})
+_INSTR_(SH, S, { *(uint16_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {
+    builder.CreateStore( builder.CreateTrunc(LGET(RS2), Type::getInt16PtrTy(ctx)), builder.CreateAdd(LGET(RS1), LC64(IMM)));
+})
+_INSTR_(SB, S, { *(uint8_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {
+    builder.CreateStore( builder.CreateTrunc(LGET(RS2), Type::getInt8PtrTy(ctx)), builder.CreateAdd(LGET(RS1), LC64(IMM)));
+})
 _INSTR_(ECALL, I, {printf("Ecall or ebreak: doing exit...\n"); heart->done = true;}, false, { builder.CreateStore(builder.getInt1(true), done); }) // WARNING same as ebreak // TODO add actuall functionality

@@ -5,6 +5,7 @@
 #include "llvm/IR/LLVMContext.h"
 #include "llvm/IR/Module.h"
 #include "llvm/Support/TargetSelect.h"
+#include <llvm-16/llvm/IR/DerivedTypes.h>
 #include <string>
 
 #include "instruction.hpp"
@@ -31,7 +32,7 @@ void RVBasicBlock::init() {
         exit(1);
     }
     jit_ft = FunctionType::get(Type::getVoidTy(ctx), 
-       {Type::getInt64PtrTy(ctx), Type::getInt8Ty(ctx), Type::getInt64PtrTy(ctx), Type::getInt1PtrTy(ctx)}, false);
+       {Type::getInt64PtrTy(ctx), Type::getInt8PtrTy(ctx), Type::getInt64PtrTy(ctx), Type::getInt1PtrTy(ctx) }, false);
 }
 
 size_t RVBasicBlock::construct(const instT *arr) {
