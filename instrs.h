@@ -18,6 +18,7 @@
     builder.CreateConstGEP1_64(Type::getInt64PtrTy(ctx), regs, reg));
 
 #define LC64(num) builder.getInt64(num)
+#define LPC (builder.CreateLoad(Type::getInt64Ty(ctx), pc))
 
 #define CODE_BIN_IU(op) SET_REG(RD, REG(RS1) op IMM);
 #define CODE_BIN_IS(op) SET_REG(RD, ((int64_t)REG(RS1)) op ((int64_t)IMM));
@@ -31,13 +32,16 @@
 #define SIX_BITS ((1<<6)-1)
 #define FIV_BITS ((1<<5)-1)
 
-_INSTR_(SLTI, I, {CODE_BIN_IS(<)}, true, {})
-_INSTR_(SLTIU, I, {CODE_BIN_IU(<)}, true, {})
-_INSTR_(ADDI, I, {CODE_BIN_IU(+)}, true, { LSET(RD, builder.CreateAdd(LC64(IMM), LGET(RS1))); })
-_INSTR_(ANDI, I, {CODE_BIN_IU(&)}, true, {})
-_INSTR_(ORI, I, {CODE_BIN_IU(|)}, true, {})
-_INSTR_(XORI, I, {CODE_BIN_IU(^)}, true, {})
-_INSTR_(SLLI, I, {SET_REG(RD, REG(RS1) << (IMM & SIX_BITS))}, true, {}) // TODO check
+
+#define JIT_BIN_IU(name) LSET(RD, builder.Create#name(LC64(IMM), LGET(RS1)));
+
+_INSTR_(SLTI, I, {CODE_BIN_IS(<)}, true, { JIT_BIN_IU(ICmpSLT) })
+_INSTR_(SLTIU, I, {CODE_BIN_IU(<)}, true, { JIT_BIN_IU(ICmpULT) })
+_INSTR_(ADDI, I, {CODE_BIN_IU(+)}, true, { JIT_BIN_IU(Add) })
+_INSTR_(ANDI, I, {CODE_BIN_IU(&)}, true, { JIT_BIN_IU(And) })
+_INSTR_(ORI, I, {CODE_BIN_IU(|)}, true, {JIT_BIN_IU(Or) })
+_INSTR_(XORI, I, {CODE_BIN_IU(^)}, true, {JIT_BIN_IU(Xor)})
+_INSTR_(SLLI, I, {SET_REG(RD, REG(RS1) << (IMM & SIX_BITS))}, true, { JIT_BIN_IU(Shl) }) // TODO check
 _INSTR_(SRLI, I, {SET_REG(RD,
                           !!(IMM & 1<<10)*(REG(RS1) >> (IMM & SIX_BITS)) // logical
                           |
@@ -49,24 +53,27 @@ _INSTR_(SRLIW, I, {SET_REG(RD,
                           |
                           !(IMM & 1<<10)*((int32_t)REG(RS1) >> (IMM & SIX_BITS)) // arithmetic
 )}, true, {}) // TODO check for correctness // WARNING decoded same as SRAIW
-_INSTR_(LUI, U, { SET_REG(RD, (IMM&INSN_FIELD_IMM20)) }, true, {})
-_INSTR_(AUIPC, U,{ SET_REG(RD, (IMM + OPC)) }, true, {}) 
-_INSTR_(ADD, R, {CODE_BIN_RU(+)}, true, { LSET(RD, builder.CreateAdd(LGET(RS2), LGET(RS1))); })
-_INSTR_(SLT, R, {CODE_BIN_RS(<)}, true, {})
-_INSTR_(SLTU, R, {CODE_BIN_RU(<)}, true, {})
-_INSTR_(AND, R, {CODE_BIN_RU(&)}, true, {})
-_INSTR_(OR, R, {CODE_BIN_RU(|)}, true, {})
-_INSTR_(XOR, R, {CODE_BIN_RU(^)}, true, {})
+_INSTR_(LUI, U, { SET_REG(RD, (IMM&INSN_FIELD_IMM20)) }, true, { LSET(RD, LC64(IMM&INSN_FIELD_IMM20)); })
+_INSTR_(AUIPC, U,{ SET_REG(RD, (IMM + OPC)) }, true, {LSET(RD, builder.CreateAdd(LC64(IMM), LPC));}) 
+
+#define JIT_BIN_OP(name) LSET(RD, builder.CreateAdd(LGET(RS2), LGET(RS1)));
+
+_INSTR_(ADD, R, {CODE_BIN_RU(+)}, true, { JIT_BIN_OP(Add) })
+_INSTR_(SLT, R, {CODE_BIN_RS(<)}, true, { JIT_BIN_OP(ICmpSLT) })
+_INSTR_(SLTU, R, {CODE_BIN_RU(<)}, true, { JIT_BIN_OP(ICmpULT) })
+_INSTR_(AND, R, {CODE_BIN_RU(&)}, true, { JIT_BIN_OP(And) })
+_INSTR_(OR, R, {CODE_BIN_RU(|)}, true, { JIT_BIN_OP(Or) })
+_INSTR_(XOR, R, {CODE_BIN_RU(^)}, true, { JIT_BIN_OP(Xor) })
 _INSTR_(SLL, R, {SET_REG(RD, REG(RS1) << (REG(RS2) & SIX_BITS))}, true, {}) // TODO check
 _INSTR_(SRL, R, {SET_REG(RD, (REG(RS1) >> (REG(RS2) & SIX_BITS)))}, true, {}) // TODO check
 _INSTR_(SRA, R, {SET_REG(RD, ((int64_t)REG(RS1) >> (REG(RS2) & SIX_BITS)))}, true, {}) // TODO check
 _INSTR_(SLLW, R, {SET_REG(RD, (uint32_t)REG(RS1) << (REG(RS2) & FIV_BITS))}, true, {}) // TODO check
 _INSTR_(SRLW, R, {SET_REG(RD, ((uint32_t)REG(RS1) >> (REG(RS2) & FIV_BITS)))}, true, {}) // TODO check
 _INSTR_(SRAW, R, {SET_REG(RD, ((int32_t)REG(RS1) >> (REG(RS2) & FIV_BITS)))}, true, {}) // TODO check
-_INSTR_(SUB, R, {CODE_BIN_RU(-)}, true, {})
+_INSTR_(SUB, R, {CODE_BIN_RU(-)}, true, { JIT_BIN_OP(Sub) })
 _INSTR_(SUBW, R, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) - REG(RS2)))}, true, {}) // TODO check if it's correct but it should be nice
 _INSTR_(ADDW, R, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) + REG(RS2)))}, true, {}) // TODO check if it's correct but it should be nice
-_INSTR_(JAL, J, { NEW_PC = OPC + IMM; SET_REG(RD, OPC + 4); }, false, {})
+_INSTR_(JAL, J, { NEW_PC = OPC + IMM; SET_REG(RD, OPC + 4); }, false, {  })
 _INSTR_(JALR, I, { NEW_PC = (IMM + REG(RS1)) & ~1ULL; SET_REG(RD, OPC + 4); }, false, {})
 _INSTR_(BEQ, B, {CODE_CJU(==)}, false, {})
 _INSTR_(BNE, B, {CODE_CJU(!=)}, false, {})
