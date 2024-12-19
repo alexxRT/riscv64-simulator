@@ -15,6 +15,8 @@
 #define DEB(x) 
 #endif
 
+#define fprintf(...)
+
 const int REGISTERS_NUM = 32;
 
 enum class EXECUTE_STATUS : int {
