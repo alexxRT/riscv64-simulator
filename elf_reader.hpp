@@ -1,6 +1,7 @@
 #ifndef ELF_READER_H
 #define ELF_READER_H
 
+#include <iostream>
 #include <elfio/elfio.hpp>
 #include "hart.hpp"
 
@@ -12,13 +13,17 @@ enum class ReaderStatus : int {
     BAD_ALLOC = 4
 };
 
-const size_t process_stack_size = 8 * 1024 * 1024;
+const size_t PROCESS_STACK_SIZE = 8 * 1024 * 1024;
 
-const size_t sp_reg_number = 2;
-const size_t ra_reg_number = 1;
+const size_t SP_REG_NUMBER = 2;
+const size_t RA_REG_NUMBER = 1;
+
+#define ALIGN64(val) (val + 64) & ~63ULL
 
 class ElfReader {
     public:
+        size_t vmem_size;
+
         ElfReader(std::string filename): reader(), vmem_(nullptr), file_loaded_(false), max_vaddr_(0) {
             file_loaded_ = reader.load(filename);
         };
@@ -43,12 +48,13 @@ class ElfReader {
                 return ReaderStatus::BAD_SEGMENT;
             }
 
-            uint64_t vmem_stack_addr = max_vaddr_ + 1 + process_stack_size;
-            uint64_t vmem_fin_ecall_addr = vmem_stack_addr + 1;
-            uint64_t vmem_max_addr = vmem_fin_ecall_addr + 4; // for exit syscall
-            size_t vmem_size = vmem_max_addr + 1;
+            uint64_t vmem_stack_addr = ALIGN64(max_vaddr_ + 1 + PROCESS_STACK_SIZE);
+            uint64_t vmem_fin_ecall_addr = ALIGN64(vmem_stack_addr + 1);
+            uint64_t vmem_max_addr = ALIGN64(vmem_fin_ecall_addr + 4); // for exit syscall
+            vmem_size = vmem_max_addr + 1;
 
             vmem_ = new uint8_t[vmem_size];
+            std::cout << "VMEM_ " << (void*)vmem_ << '\n';
             if (!vmem_) {
                 return ReaderStatus::BAD_ALLOC;
             }
@@ -71,8 +77,8 @@ class ElfReader {
             *(uint32_t*)(vmem_ + vmem_fin_ecall_addr) = 0x00000073; // ecall
 
             hart.memory = vmem_;
-            hart.registers[sp_reg_number] = vmem_stack_addr;
-            hart.registers[ra_reg_number] = vmem_fin_ecall_addr;
+            hart.registers[SP_REG_NUMBER] = vmem_stack_addr;
+            hart.registers[RA_REG_NUMBER] = vmem_fin_ecall_addr;
 
             return ReaderStatus::SUCCESS;
         }

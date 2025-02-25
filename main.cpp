@@ -88,6 +88,7 @@ void run_8q() {
         return;
     }
 
+    std::cout << "STACK POINTER " << hart.registers[2] << " VMEM SIZE " << reader.vmem_size << '\n';
     auto start = std::chrono::steady_clock::now();
 
     hart.simulate();
