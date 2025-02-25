@@ -85,7 +85,7 @@ using llvm::PHINode;
 
 #define _INSTR_(name, type, code, linear, jit) \
 void jit_##name(Instruction &instr, llvm::IRBuilder<> &builder, llvm::LLVMContext &ctx, Value* regs, Value *mem, Value *pc, Function *fn, Value *done) { \
-std::cout << "dec " #name "\n"; \
+    DEB("dec " #name); \
     Value* new_pc = builder.CreateAdd(builder.CreateLoad(Type::getInt64Ty(ctx), pc, "pc"), builder.getInt64(4), "new_pc"); \
     jit  \
     builder.CreateStore(new_pc, pc); \
