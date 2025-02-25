@@ -1,5 +1,7 @@
 #include "instruction.hpp"
 #include "hart.hpp"
+#include <llvm-16/llvm/IR/Function.h>
+#include <llvm-16/llvm/IR/IRBuilder.h>
 
 void decode_instruction_R(Instruction &ins, instT code) {
     DEB("decs R");
@@ -54,11 +56,41 @@ void empty_executor(Hart *hart, const Instruction &instr) {
 #define EXEC_RET_true (&instr+1)->execute(heart, *(&instr+1))
 #define EXEC_RET_false 
 
-#define _INSTR_(name, type, code, linear) \
+#define _INSTR_(name, type, code, linear, jit) \
 __attribute__((noinline)) void exec_##name(Hart *heart, const Instruction &instr) { \
     DEB("exec "#name); \
     {int new_pc = heart->pc+4; code; heart->pc = new_pc;} \
     EXEC_RET_##linear; }
+
+#include "instrs.h"
+#undef _INSTR_
+#undef EXEC_RET_false
+#undef EXEC_RET_true
+
+};
+
+namespace Jiters {
+void empty_jiter(Instruction &instr, llvm::IRBuilder<> &builder) {
+    builder.CreateRetVoid();
+} // for basic blocks
+
+using llvm::Type;
+using llvm::Value;
+using llvm::BasicBlock;
+using llvm::Function;
+using llvm::PHINode;
+
+#define EXEC_RET_true
+#define EXEC_RET_false builder.CreateRetVoid();
+
+#define _INSTR_(name, type, code, linear, jit) \
+void jit_##name(Instruction &instr, llvm::IRBuilder<> &builder, llvm::LLVMContext &ctx, Value* regs, Value *mem, Value *pc, Function *fn, Value *done) { \
+    DEB("dec " #name); \
+    Value* new_pc = builder.CreateAdd(builder.CreateLoad(Type::getInt64Ty(ctx), pc, "pc"), builder.getInt64(4), "new_pc"); \
+    jit  \
+    builder.CreateStore(new_pc, pc); \
+    EXEC_RET_##linear \
+}
 
 #include "instrs.h"
 #undef _INSTR_

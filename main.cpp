@@ -1,6 +1,7 @@
 //#define DEBUG
 
 #include "hart.hpp"
+#include "basic_block.hpp"
 #include "elf_reader.hpp"
 
 #include <cstdint>
@@ -62,6 +63,10 @@ bool test_elf_reader() {
         return false;
     }
     hart.simulate();
+    std::cout << (hart.registers[20] )
+        << (hart.registers[11])
+        << (hart.registers[12] )
+        << (hart.registers[13] ) << '\n';
     bool status = (hart.registers[20] == 10)
         and (hart.registers[11] == 20)
         and (hart.registers[12] == 30)
@@ -96,6 +101,7 @@ void run_8q() {
 }
 
 int main() {
+    RVBasicBlock::init();
     if (test_fib_imm() and test_elf_reader())
         std::cout << "tests are OK!\n";
     else {
