@@ -54,7 +54,6 @@ class ElfReader {
             vmem_size = vmem_max_addr + 1;
 
             vmem_ = new uint8_t[vmem_size];
-            std::cout << "VMEM_ " << (void*)vmem_ << '\n';
             if (!vmem_) {
                 return ReaderStatus::BAD_ALLOC;
             }

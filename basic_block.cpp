@@ -100,12 +100,13 @@ size_t RVBasicBlock::do_jit(const instT *arr) {
         instrs[BB_len].execute = Executors::empty_executor;
         len = BB_len+1;
     }
+#ifdef DEBUG
     module->print(outs(), nullptr);
-    std::cout << "printed\n";
+    DEB("printed");
 
     bool verif = verifyModule(*module, &outs());
     outs() << "[VERIFICATION] " << (!verif ? "OK\n\n" : "FAIL\n\n");
-
+#endif
 
 
     if (auto err = jit->get()->addIRModule(ThreadSafeModule(std::move(module), std::make_unique<LLVMContext>()))) {
@@ -113,18 +114,18 @@ size_t RVBasicBlock::do_jit(const instT *arr) {
         return 1;
     }
 
-    std::cout << jit->get() << " no err\n";
+    DEB(jit->get() << " no err");
     // Look up the JIT'd function, cast it to a function pointer, then call it.
     auto jit_func_sym = jit->get()->lookup(name);
-    std::cout << jit->get() << " no err\n";
+    DEB(jit->get() << " no err");
     if (!jit_func_sym) {
         std::cerr << "Failed to look up function: " << toString(jit_func_sym.takeError()) << std::endl;
         return 1;
     }
 
-    std::cout << "looked up\n";
+    DEB("looked up");
     // Cast the symbol's address to a function pointer and call it.
     jitted = jit_func_sym->toPtr<BBFType>();
-    std::cout << "casted\n";
+    DEB("casted");
     return BB_len+1;
 }
