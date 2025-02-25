@@ -11,14 +11,15 @@
 #define REG(reg) (heart->get_reg(reg))
 #define SET_REG(reg, val) (heart->set_reg(reg, val)); DEB("set reg: " << REG(reg));
 
-#define LGET(reg) ( builder.CreateLoad(Type::getInt64Ty(ctx), \
-    builder.CreateConstGEP1_64(Type::getInt64PtrTy(ctx), regs, reg) ) )
-
-#define LSET(reg, val) builder.CreateStore(val,  \
-    builder.CreateConstGEP1_64(Type::getInt64PtrTy(ctx), regs, reg));
-
 #define LC64(num) builder.getInt64(num)
-#define LPC (builder.CreateLoad(Type::getInt64Ty(ctx), pc))
+
+#define LGET(reg) ( (reg) ? (builder.CreateLoad(Type::getInt64Ty(ctx), \
+    builder.CreateConstGEP1_64(Type::getInt64PtrTy(ctx), regs, reg), #reg "_" )) : ((Value*) LC64(0)) )
+
+#define LSET(reg, val) { if (reg) builder.CreateStore(val,  \
+    builder.CreateConstGEP1_64(Type::getInt64PtrTy(ctx), regs, reg, #reg "_" )); }
+
+#define LPC (builder.CreateLoad(Type::getInt64Ty(ctx), pc, "pc"))
 
 #define CODE_BIN_IU(op) SET_REG(RD, REG(RS1) op IMM);
 #define CODE_BIN_IS(op) SET_REG(RD, ((int64_t)REG(RS1)) op ((int64_t)IMM));
@@ -99,16 +100,22 @@ _INSTR_(SUBW, R, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) - REG(RS2)))}, true, {
 _INSTR_(ADDW, R, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) + REG(RS2)))}, true, {
  LSET(RD, builder.CreateSExt( builder.CreateAdd( builder.CreateTrunc( LGET(RS1), Type::getInt32PtrTy(ctx) ), LGET(RS2)) , Type::getInt64PtrTy(ctx)));
 }) // TODO check if it's correct but it should be nice
-_INSTR_(JAL, J, { NEW_PC = OPC + IMM; SET_REG(RD, OPC + 4); }, false, { builder.CreateStore(new_pc, builder.CreateAdd(LPC, LC64(IMM))); LSET(RD, builder.CreateAdd(LPC, LC64(4)));  })
-_INSTR_(JALR, I, { NEW_PC = (IMM + REG(RS1)) & ~1ULL; SET_REG(RD, OPC + 4); }, false, { builder.CreateStore(new_pc, builder.CreateAnd( builder.CreateAdd(LGET(RS1), LC64(IMM)), LC64(~1ULL))); LSET(RD, builder.CreateAdd(LPC, LC64(4))); })
+_INSTR_(JAL, J, { NEW_PC = OPC + IMM; SET_REG(RD, OPC + 4); }, false, { new_pc = builder.CreateAdd(LPC, LC64(IMM), "new_pc"); LSET(RD, builder.CreateAdd(LPC, LC64(4)));  })
+_INSTR_(JALR, I, { NEW_PC = (IMM + REG(RS1)) & ~1ULL; SET_REG(RD, OPC + 4); }, false, { new_pc = builder.CreateAnd( builder.CreateAdd(LGET(RS1), LC64(IMM)), LC64(~1ULL), "new_pc"); LSET(RD, builder.CreateAdd(LPC, LC64(4))); })
 
 #define JIT_COND_JMP(name) BasicBlock *trueBr = BasicBlock::Create(ctx, "", fn); \
-BasicBlock *retBr = BasicBlock::Create(ctx, "", fn); \
-builder.CreateCondBr(builder.CreateICmp##name(LGET(RS1), LGET(RS2)), trueBr, retBr); \
-builder.SetInsertPoint(trueBr); \
-builder.CreateStore(builder.CreateAdd(LPC, LC64(IMM)), new_pc); \
-builder.CreateBr(retBr); \
-builder.SetInsertPoint(retBr);
+    BasicBlock *retBr = BasicBlock::Create(ctx, "", fn); \
+    Value* old_new_pc = new_pc; \
+    BasicBlock* entryBlock = &fn->getEntryBlock(); \
+    builder.CreateCondBr(builder.CreateICmp##name(LGET(RS1), LGET(RS2)), trueBr, retBr); \
+    builder.SetInsertPoint(trueBr); \
+    new_pc = builder.CreateAdd(LPC, LC64(IMM), "new_pc"); \
+    builder.CreateBr(retBr); \
+    builder.SetInsertPoint(retBr); \
+    PHINode* phi = builder.CreatePHI(Type::getInt64Ty(ctx), 2, "new_pc_" #name); \
+    phi->addIncoming(old_new_pc, entryBlock); \
+    phi->addIncoming(new_pc, trueBr); \
+    new_pc = phi;
 
 _INSTR_(BEQ, B, {CODE_CJU(==)}, false, { JIT_COND_JMP(EQ) })
 _INSTR_(BNE, B, {CODE_CJU(!=)}, false, { JIT_COND_JMP(NE) })

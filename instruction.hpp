@@ -74,7 +74,7 @@ using llvm::Value;
 using llvm::Function;
 
 #define _INSTR_(name, type, code, linear, jit) \
-void jit_##name(Instruction &instr, llvm::IRBuilder<> &builder, llvm::LLVMContext &ctx, Value* regs, Value *mem, Value *pc, Value *new_pc, Function *fn, Value *done);
+void jit_##name(Instruction &instr, llvm::IRBuilder<> &builder, llvm::LLVMContext &ctx, Value* regs, Value *mem, Value *pc, Function *fn, Value *done);
 
 #include "instrs.h"
 #undef _INSTR_

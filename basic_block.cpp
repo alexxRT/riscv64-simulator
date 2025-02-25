@@ -75,7 +75,6 @@ size_t RVBasicBlock::do_jit(const instT *arr) {
     Value* mem = &*args++;
     Value* pc = &*args++;
     Value* done = &*args;
-    Value* new_pc = builder.CreateAlloca(Type::getInt64Ty(ctx), 0, "new_pc");
 
     int i = 0;
     for (; i < BB_len; i++) {
@@ -90,7 +89,7 @@ size_t RVBasicBlock::do_jit(const instT *arr) {
         auto dec = decoders[fingerprint];
         DEB("decoding..");
         dec.decod(instrs[i], instruction);
-        dec.jit(instrs[i], builder, ctx, regs, mem, pc, new_pc, fn, done);
+        dec.jit(instrs[i], builder, ctx, regs, mem, pc, fn, done);
         if (!dec.linear) {
             len = i + 1;
             break;

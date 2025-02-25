@@ -1,6 +1,6 @@
 CC = clang++
 INCLUDE = -I../ELFIOgit
-CFLAGS = -Wno-initializer-overrides -Wno-c99-designator -O3 $(INCLUDE) `llvm-config --cppflags --ldflags --libs` 
+CFLAGS = -Wno-initializer-overrides -Wno-c99-designator -O3 -MMD -MP $(INCLUDE) -Wno-unused-command-line-argument `llvm-config --cppflags --ldflags --libs`
 BUILDDIR = build
 SRCDIR = .
 
@@ -31,5 +31,7 @@ mkdir:
 clean:
 	rm -rf $(BUILDDIR)
 
-run:
+run: simulator
 	$(BUILDDIR)/simulator
+
+-include $(OBJS:.o=.d)
