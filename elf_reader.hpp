@@ -12,6 +12,11 @@ enum class ReaderStatus : int {
     BAD_ALLOC = 4
 };
 
+const size_t process_stack_size = 8 * 1024 * 1024;
+
+const size_t sp_reg_number = 2;
+const size_t ra_reg_number = 1;
+
 class ElfReader {
     public:
         ElfReader(std::string filename): reader(), vmem_(nullptr), file_loaded_(false), max_vaddr_(0) {
@@ -38,7 +43,12 @@ class ElfReader {
                 return ReaderStatus::BAD_SEGMENT;
             }
 
-            vmem_ = new uint8_t[max_vaddr_ + 1];
+            uint64_t vmem_stack_addr = max_vaddr_ + 1 + process_stack_size;
+            uint64_t vmem_fin_ecall_addr = vmem_stack_addr + 1;
+            uint64_t vmem_max_addr = vmem_fin_ecall_addr + 4; // for exit syscall
+            size_t vmem_size = vmem_max_addr + 1;
+
+            vmem_ = new uint8_t[vmem_size];
             if (!vmem_) {
                 return ReaderStatus::BAD_ALLOC;
             }
@@ -48,26 +58,22 @@ class ElfReader {
 
                     uint64_t segment_start = segment->get_virtual_address();
                     size_t segment_size = segment->get_memory_size();
+                    const char* data = segment->get_data();
 
-                    std::memcpy(&vmem_[segment_start], segment->get_data(), segment_size);
-                }
-            }
-
-            for (const auto& section : reader.sections) {
-                if (section->get_name() == ".text") {
-
-                    uint64_t section_start = section->get_address();
-                    uint64_t section_end = section_start + section->get_size();
-                    if (section_end > max_vaddr_) {
-                        return ReaderStatus::BAD_SECTION;
+                    if (data) {
+                        std::memcpy(&(vmem_[segment_start]), data, segment_size);
                     }
-
-                    hart.pc = section_start;
-                    break;
                 }
             }
+
+            hart.pc = reader.get_entry();
+ 
+            *(uint32_t*)(vmem_ + vmem_fin_ecall_addr) = 0x00000073; // ecall
 
             hart.memory = vmem_;
+            hart.registers[sp_reg_number] = vmem_stack_addr;
+            hart.registers[ra_reg_number] = vmem_fin_ecall_addr;
+
             return ReaderStatus::SUCCESS;
         }
 

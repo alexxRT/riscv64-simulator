@@ -6,6 +6,8 @@
 #include <cstdint>
 #include <vector>
 
+#include <chrono>
+
 bool test_fib_imm() {
     // fibonacci
     /*
@@ -73,14 +75,24 @@ bool test_elf_reader() {
 
 void run_8q() {
     Hart hart;
-    ElfReader reader("build/8q");
+    ElfReader reader("build/8queens");
     ReaderStatus read_st = reader.load_instructions(hart);
     if (read_st != ReaderStatus::SUCCESS) {
         std::cout << "failed to load instrs, ELF LOAD test failed :(\n";
         std::cout << "load err: " << int(read_st) << '\n';
         return;
     }
+
+    auto start = std::chrono::steady_clock::now();
+
     hart.simulate();
+
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double, std::milli> elapsed = end - start;
+
+    std::cout << "Time taken: " << elapsed.count() << " ms" << std::endl;
+    std::cout << "Intructions executed: " << hart.ins_cnt << std::endl;
+    std::cout << "Performance total: " << (hart.ins_cnt / elapsed.count()) / 1e3 << " Mips" << std::endl;
 }
 
 int main() {
@@ -90,6 +102,8 @@ int main() {
         std::cout << "tests are bad :(\n";
         return 1;
     }
-    //run_8q();
+
+    run_8q();
+
     return 0;
 }
