@@ -32,7 +32,6 @@
 #define SIX_BITS ((1<<6)-1)
 #define FIV_BITS ((1<<5)-1)
 
-
 #define JIT_BIN_IU(name) LSET(RD, builder.Create##name(LC64(IMM), LGET(RS1)));
 
 _INSTR_(SLTI, I, {CODE_BIN_IS(<)}, true, { JIT_BIN_IU(ICmpSLT) })

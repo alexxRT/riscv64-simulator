@@ -12,7 +12,7 @@ enum class ReaderStatus : int {
     BAD_ALLOC = 4
 };
 
-const size_t process_stack_size = 180 * 1024 * 1024;
+const size_t process_stack_size = 8 * 1024 * 1024;
 
 const size_t sp_reg_number = 2;
 const size_t ra_reg_number = 1;

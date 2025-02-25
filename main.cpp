@@ -87,9 +87,17 @@ void run_8q() {
         std::cout << "load err: " << int(read_st) << '\n';
         return;
     }
-    // fprintf(stderr, "vmem = %p\n", reader.vmem());
+
+    auto start = std::chrono::steady_clock::now();
+
     hart.simulate();
-    std::cout << "i:" << hart.ins_cnt<<'\n';
+
+    auto end = std::chrono::steady_clock::now();
+    std::chrono::duration<double, std::milli> elapsed = end - start;
+
+    std::cout << "Time taken: " << elapsed.count() << " ms" << std::endl;
+    std::cout << "Intructions executed: " << hart.ins_cnt << std::endl;
+    std::cout << "Performance total: " << (hart.ins_cnt / elapsed.count()) / 1e3 << " Mips" << std::endl;
 }
 
 int main() {
@@ -100,15 +108,8 @@ int main() {
         std::cout << "tests are bad :(\n";
         return 1;
     }
-    auto start = std::chrono::steady_clock::now();
 
     run_8q();
 
-    // Stop measuring time
-    auto end = std::chrono::steady_clock::now();
-
-    // Calculate elapsed time in milliseconds
-    std::chrono::duration<double, std::milli> elapsed = end - start;
-    std::cout << "Time taken: " << elapsed.count() << " ms" << std::endl;
     return 0;
 }
