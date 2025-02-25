@@ -8,6 +8,7 @@ EXECUTE_STATUS Hart::simulate() {
     while (!done) {
         DEB("decoding at pc=" << pc);
         RVBasicBlock &bb = bbs_arr[(pc >> 2) & BB_arr_mask];
+        std::cout << "decoding at pc=" << pc << '\n';
         if (bb.addr == pc) {
             bb.jitted(this->registers.data(), this->memory, &this->pc, &this->done);
 //            bb.instrs[0].execute(this, bb.instrs[0]);

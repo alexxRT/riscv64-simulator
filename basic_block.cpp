@@ -100,13 +100,11 @@ size_t RVBasicBlock::do_jit(const instT *arr) {
         instrs[BB_len].execute = Executors::empty_executor;
         len = BB_len+1;
     }
-#ifdef DEBUG
     module->print(outs(), nullptr);
     DEB("printed");
 
     bool verif = verifyModule(*module, &outs());
     outs() << "[VERIFICATION] " << (!verif ? "OK\n\n" : "FAIL\n\n");
-#endif
 
 
     if (auto err = jit->get()->addIRModule(ThreadSafeModule(std::move(module), std::make_unique<LLVMContext>()))) {

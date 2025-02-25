@@ -157,37 +157,37 @@ _INSTR_(ADDIW, I, {SET_REG(RD, (int64_t)(int32_t)(REG(RS1) + IMM))}, true, {
 
 #define IRADDR IRCR(GEP, I8T, mem, IRCR(Add, LGET(RS1), LC64(IMM)))
 
-_INSTR_(LD, I, { SET_REG(RD, *(uint64_t*)MEM(REG(RS1)+IMM)); }, false, {
+_INSTR_(LD, I, { SET_REG(RD, *(uint64_t*)MEM(REG(RS1)+IMM)); }, true, {
     LSET(RD, IRCR(Load, I64PTR, IRADDR));
 })
-_INSTR_(LW, I, { SET_REG(RD, *(int32_t*)MEM(REG(RS1)+IMM)); }, false, {
+_INSTR_(LW, I, { SET_REG(RD, *(int32_t*)MEM(REG(RS1)+IMM)); }, true, {
     LSET(RD, IRCR(SExt, IRCR(Load, I32T, IRADDR), I64T));
 })
-_INSTR_(LWU, I, { SET_REG(RD, *(uint32_t*)MEM(REG(RS1)+IMM)); }, false, {
+_INSTR_(LWU, I, { SET_REG(RD, *(uint32_t*)MEM(REG(RS1)+IMM)); }, true, {
     LSET(RD, IRCR(ZExt, IRCR(Load, I32T, IRADDR), I64T));
 })
-_INSTR_(LH, I, { SET_REG(RD, *(int16_t*)MEM(REG(RS1)+IMM)); }, false, {
+_INSTR_(LH, I, { SET_REG(RD, *(int16_t*)MEM(REG(RS1)+IMM)); }, true, {
     LSET(RD, IRCR(SExt, IRCR(Load, I16T, IRADDR), I64T));
 })
-_INSTR_(LHU, I, { SET_REG(RD, *(uint16_t*)MEM(REG(RS1)+IMM)); }, false, {
+_INSTR_(LHU, I, { SET_REG(RD, *(uint16_t*)MEM(REG(RS1)+IMM)); }, true, {
     LSET(RD, IRCR(ZExt, IRCR(Load, I16T, IRADDR), I64T));
 })
-_INSTR_(LB, I, { SET_REG(RD, *(int8_t*)MEM(REG(RS1)+IMM)); }, false, {
+_INSTR_(LB, I, { SET_REG(RD, *(int8_t*)MEM(REG(RS1)+IMM)); }, true, {
     LSET(RD, IRCR(SExt, IRCR(Load, I8T, IRADDR), I64T));
 })
-_INSTR_(LBU, I, { SET_REG(RD, *(uint8_t*)MEM(REG(RS1)+IMM)); }, false, {
+_INSTR_(LBU, I, { SET_REG(RD, *(uint8_t*)MEM(REG(RS1)+IMM)); }, true, {
     LSET(RD, IRCR(ZExt, IRCR(Load, I8T, IRADDR), I64T));
 })
-_INSTR_(SD, S, { *(uint64_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {
+_INSTR_(SD, S, { *(uint64_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, true, {
     IRCR(Store, LGET(RS2), IRADDR);
 })
-_INSTR_(SW, S, { *(uint32_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {
+_INSTR_(SW, S, { *(uint32_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, true, {
     IRCR(Store,  IRCR(Trunc, LGET(RS2), I32T), IRADDR);
 })
-_INSTR_(SH, S, { *(uint16_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {
+_INSTR_(SH, S, { *(uint16_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, true, {
     IRCR(Store,  IRCR(Trunc, LGET(RS2), I16T), IRADDR);
 })
-_INSTR_(SB, S, { *(uint8_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, false, {
+_INSTR_(SB, S, { *(uint8_t*)MEM(REG(RS1)+IMM) = REG(RS2); }, true, {
     IRCR(Store,  IRCR(Trunc, LGET(RS2), I8T), IRADDR);
 })
 _INSTR_(ECALL, I, {printf("Ecall or ebreak: doing exit...\n"); heart->done = true;}, false, { IRCR(Store, builder.getInt1(true), done); }) // WARNING same as ebreak // TODO add actuall functionality
