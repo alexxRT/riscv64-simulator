@@ -20,3 +20,18 @@ EXECUTE_STATUS Hart::simulate() {
     }
     return EXECUTE_STATUS::SUCCESS;
 }
+
+EXECUTE_STATUS Hart::exec_instr() {
+    BasicBlock &bb = bbs_arr[(pc >> 2) & BB_arr_mask];
+    if (bb.addr == pc) {
+        bb.instrs[0].execute(this, bb.instrs[0]);
+        ins_cnt += bb.len;
+    }
+    else {
+        bb.construct((instT*)(memory+pc));
+        bb.addr = pc;
+        bb.instrs[0].execute(this, bb.instrs[0]);
+        ins_cnt += bb.len;
+    }
+    return EXECUTE_STATUS::SUCCESS;
+}

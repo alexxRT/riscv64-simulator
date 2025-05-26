@@ -5,7 +5,7 @@
 #include "mask.hpp"
 #include <cstdint>
 
-const size_t BB_len = 31;
+const size_t BB_len = 1;
 const size_t BB_arr_mask = (1<<17)-1; // TODO it's 90MB, maybe more?
 
 class BasicBlock {
