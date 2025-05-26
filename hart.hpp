@@ -41,7 +41,9 @@ public:
     uint8_t *memory;
     bool done;
 
-    Hart() : registers({}), pc(0), memory(nullptr), done(false), ins_cnt(0) { }
+    Hart() : registers({}), pc(0), memory(nullptr), done(false), ins_cnt(0) {
+        fill_arrays();
+    }
 
     uint64_t get_reg(int ind) {
         return registers[ind];

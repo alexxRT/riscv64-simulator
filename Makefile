@@ -21,5 +21,5 @@ mkdir:
 clean:
 	rm -rf $(BUILDDIR)
 
-run:
+run: all
 	$(BUILDDIR)/simulator
