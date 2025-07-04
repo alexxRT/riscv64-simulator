@@ -18,4 +18,6 @@ struct Decode {
 
 extern Decode decoders[(1<<18)-1];
 
+void fill_arrays();
+
 #endif // MASK_H

@@ -52,6 +52,8 @@ public:
     }
 
     EXECUTE_STATUS simulate();
+
+    void exec_instr();
 };
 
 #endif //HART_H
