@@ -43,8 +43,7 @@ lop:
 
     hart.memory = (uint8_t*)fib.data();
     hart.pc = 4;
-    while (!hart.done)
-        hart.exec_instr();
+    hart.simulate();
     std::cout << "fib(9): " << hart.registers[3] << " (34=>ok)\n";
     if (hart.registers[3] != 34) {
         std::cerr << "Fibonacci test from array was not passed!!!\n";
@@ -62,8 +61,7 @@ bool test_elf_reader() {
         std::cout << "load err: " << int(read_st) << '\n';
         return false;
     }
-    while (!hart.done)
-        hart.exec_instr();
+    hart.simulate();
     bool status = (hart.registers[20] == 10)
         and (hart.registers[11] == 20)
         and (hart.registers[12] == 30)
@@ -87,8 +85,7 @@ void run_8q() {
 
     auto start = std::chrono::steady_clock::now();
 
-    while (!hart.done)
-        hart.exec_instr();
+    hart.simulate();
 
     auto end = std::chrono::steady_clock::now();
     std::chrono::duration<double, std::milli> elapsed = end - start;
@@ -99,6 +96,8 @@ void run_8q() {
 }
 
 int main() {
+    fill_arrays();
+
     if (test_fib_imm() and test_elf_reader())
         std::cout << "tests are OK!\n";
     else {
