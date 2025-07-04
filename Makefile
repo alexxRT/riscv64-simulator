@@ -31,7 +31,7 @@ mkdir:
 clean:
 	rm -rf $(BUILDDIR)
 
-run: simulator
+run: all
 	$(BUILDDIR)/simulator
 
 -include $(OBJS:.o=.d)

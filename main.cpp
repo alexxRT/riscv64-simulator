@@ -102,6 +102,8 @@ void run_8q() {
 
 int main() {
     RVBasicBlock::init();
+    fill_arrays();
+
     if (test_fib_imm() and test_elf_reader())
         std::cout << "tests are OK!\n";
     else {
