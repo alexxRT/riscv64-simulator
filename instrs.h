@@ -1,3 +1,4 @@
+#include <cstdint>
 #include "encoding.out.h"
 // #define _INSTR_(name, type, code, linear)
 
@@ -35,7 +36,7 @@
 
 #define LPC (IRCR(Load, I64T, pc, "pc"))
 
-#define CODE_BIN_IU(op) SET_REG(RD, REG(RS1) op IMM);
+#define CODE_BIN_IU(op) DEB((int64_t)REG(RS1) << ' ' << IMM)  SET_REG(RD, REG(RS1) op IMM); DEB(REG(RD));
 #define CODE_BIN_IS(op) SET_REG(RD, ((int64_t)REG(RS1)) op ((int64_t)IMM));
 
 #define CODE_BIN_RU(op) SET_REG(RD, REG(RS1) op REG(RS2));
@@ -47,7 +48,7 @@
 #define SIX_BITS ((1<<6)-1)
 #define FIV_BITS ((1<<5)-1)
 
-#define JIT_BIN_IU(name) LSET(RD, IRCR(name, LC64(IMM), LGET(RS1)));
+#define JIT_BIN_IU(name) LSET(RD, IRCR(ZExt, IRCR(name, LGET(RS1), LC64(IMM)), I64T));
 
 _INSTR_(SLTI, I, {CODE_BIN_IS(<)}, true, { JIT_BIN_IU(ICmpSLT) })
 _INSTR_(SLTIU, I, {CODE_BIN_IU(<)}, true, { JIT_BIN_IU(ICmpULT) })

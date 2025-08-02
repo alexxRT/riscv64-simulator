@@ -40,8 +40,22 @@ public:
     std::array<regT, REGISTERS_NUM> registers;
     uint8_t *memory;
     bool done;
+    bool use_jit;
 
-    Hart() : registers({}), pc(0), memory(nullptr), done(false), ins_cnt(0) { }
+    RVBasicBlock *bbs_arr;
+
+    Hart(bool use_jit_)
+        : registers({}),
+          pc(0),
+          memory(nullptr),
+          done(false),
+          ins_cnt(0),
+          use_jit(use_jit_),
+          bbs_arr(new RVBasicBlock[BB_arr_mask+1]()){}
+
+    ~Hart() {
+        delete[] bbs_arr;
+    }
 
     uint64_t get_reg(int ind) {
         return registers[ind];
@@ -54,6 +68,8 @@ public:
     EXECUTE_STATUS simulate();
 
     void exec_instr();
+
+    void bb_run_instr();
 
     void jit_run_instr();
 };

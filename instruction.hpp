@@ -35,6 +35,10 @@ public:
     Instruction(instT code, executorT execute_) : execute(execute_) {}
     Instruction() {}
 
+    void dump() {
+        std::cout << (int)rs1 << ' ' << (int)rs2 << ' ' << (int)rd << ' ' << (int)imm << '\n';
+    }
+
     instT instr_code;
     regIDT rs1, rs2, rd;
     uint64_t imm;
@@ -67,7 +71,7 @@ void exec_##name(Hart *heart, const Instruction &instr);
 };
 
 namespace Jiters {
-void empty_jiter(Instruction &instr, llvm::IRBuilder<> &builder); // for basic blocks
+void empty_jiter(llvm::IRBuilder<> &builder); // for basic blocks
 
 using llvm::Type;
 using llvm::Value;

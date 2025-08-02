@@ -1,18 +1,26 @@
 #include "hart.hpp"
+#include <iostream>
 #include "instruction.hpp"
 #include "basic_block.hpp"
 
 EXECUTE_STATUS Hart::simulate() {
     EXECUTE_STATUS status = EXECUTE_STATUS::SUCCESS;
     while (!done) {
-        DEB("decoding at pc=" << pc);
-        //jit_run_instr();
         exec_instr();
     }
     return EXECUTE_STATUS::SUCCESS;
 }
 
 void Hart::exec_instr() {
+    DEB("decoding at pc=" << pc);
+    if (use_jit)
+        jit_run_instr();
+    else
+        bb_run_instr();
+}
+
+void Hart::bb_run_instr() {
+    DEB("execbb");
     RVBasicBlock &bb = bbs_arr[(pc >> 2) & BB_arr_mask];
     if (bb.addr == pc) {
         bb.instrs[0].execute(this, bb.instrs[0]);
@@ -27,9 +35,11 @@ void Hart::exec_instr() {
 }
 
 void Hart::jit_run_instr() {
+    DEB("execjit");
     RVBasicBlock &bb = bbs_arr[(pc >> 2) & BB_arr_mask];
-    std::cout << "decoding at pc=" << pc << '\n';
+    DEB("decoding at pc=" << pc << " bb.addr=" << bb.addr);
     if (bb.addr == pc) {
+        DEB("already jitted")
         bb.jitted(this->registers.data(), this->memory, &this->pc, &this->done);
         ins_cnt += bb.len;
     } else {

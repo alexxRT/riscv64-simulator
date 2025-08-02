@@ -15,8 +15,6 @@
 using namespace llvm;
 using namespace llvm::orc;
 
-RVBasicBlock bbs_arr[BB_arr_mask+1] = {};
-
 static llvm::Expected<std::unique_ptr<llvm::orc::LLJIT>> jit = nullptr;
 static llvm::LLVMContext ctx;
 static llvm::FunctionType *jit_ft;
@@ -49,6 +47,7 @@ size_t RVBasicBlock::construct(const instT *arr) {
         auto dec = decoders[fingerprint];
         DEB("decoding..");
         dec.decod(instrs[i], instruction);
+        instrs[i].dump();
         instrs[i].execute = dec.exec;
         if (!dec.linear) {
             len = i + 1;
@@ -90,6 +89,7 @@ size_t RVBasicBlock::do_jit(const instT *arr) {
         DEB("decoding..");
         dec.decod(instrs[i], instruction);
         dec.jit(instrs[i], builder, ctx, regs, mem, pc, fn, done);
+        instrs[i].dump();
         if (!dec.linear) {
             len = i + 1;
             break;
@@ -97,7 +97,7 @@ size_t RVBasicBlock::do_jit(const instT *arr) {
     }
     if (i==BB_len) {
         DEB("decoded\n");
-        instrs[BB_len].execute = Executors::empty_executor;
+        Jiters::empty_jiter(builder);
         len = BB_len+1;
     }
     module->print(outs(), nullptr);

@@ -70,7 +70,7 @@ __attribute__((noinline)) void exec_##name(Hart *heart, const Instruction &instr
 };
 
 namespace Jiters {
-void empty_jiter(Instruction &instr, llvm::IRBuilder<> &builder) {
+void empty_jiter(llvm::IRBuilder<> &builder) {
     builder.CreateRetVoid();
 } // for basic blocks
 
