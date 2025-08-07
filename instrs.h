@@ -87,7 +87,7 @@ _INSTR_(SRLIW, I, {SET_REG(RD,
 _INSTR_(LUI, U, { SET_REG(RD, (IMM&INSN_FIELD_IMM20)) }, true, { LSET(RD, LC64(IMM&INSN_FIELD_IMM20)); })
 _INSTR_(AUIPC, U,{ SET_REG(RD, (IMM + OPC)) }, true, {LSET(RD, IRCR(Add, LC64(IMM), LPC));}) 
 
-#define JIT_BIN_OP(name) LSET(RD, IRCR(name, LGET(RS1), LGET(RS2)));
+#define JIT_BIN_OP(name) LSET(RD, IRCR(ZExt, IRCR(name, LGET(RS1), LGET(RS2)), I64T));
 
 _INSTR_(ADD, R, {CODE_BIN_RU(+)}, true, { JIT_BIN_OP(Add) })
 _INSTR_(SLT, R, {CODE_BIN_RS(<)}, true, { JIT_BIN_OP(ICmpSLT) })
