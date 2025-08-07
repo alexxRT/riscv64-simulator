@@ -47,7 +47,9 @@ size_t RVBasicBlock::construct(const instT *arr) {
         auto dec = decoders[fingerprint];
         DEB("decoding..");
         dec.decod(instrs[i], instruction);
+#ifdef DEBUG
         instrs[i].dump();
+#endif
         instrs[i].execute = dec.exec;
         if (!dec.linear) {
             len = i + 1;
@@ -89,7 +91,9 @@ size_t RVBasicBlock::do_jit(const instT *arr) {
         DEB("decoding..");
         dec.decod(instrs[i], instruction);
         dec.jit(instrs[i], builder, ctx, regs, mem, pc, fn, done);
+#ifdef DEBUG
         instrs[i].dump();
+#endif
         if (!dec.linear) {
             len = i + 1;
             break;
@@ -100,11 +104,13 @@ size_t RVBasicBlock::do_jit(const instT *arr) {
         Jiters::empty_jiter(builder);
         len = BB_len+1;
     }
+#ifdef DEBUG
     module->print(outs(), nullptr);
+#endif
     DEB("printed");
 
     bool verif = verifyModule(*module, &outs());
-    outs() << "[VERIFICATION] " << (!verif ? "OK\n\n" : "FAIL\n\n");
+    DEB("[VERIFICATION] " << (!verif ? "OK\n\n" : "FAIL\n"));
 
 
     if (auto err = jit->get()->addIRModule(ThreadSafeModule(std::move(module), std::make_unique<LLVMContext>()))) {
