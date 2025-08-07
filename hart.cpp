@@ -5,9 +5,8 @@
 
 EXECUTE_STATUS Hart::simulate() {
     EXECUTE_STATUS status = EXECUTE_STATUS::SUCCESS;
-    while (!done) {
+    while (!done)
         exec_instr();
-    }
     return EXECUTE_STATUS::SUCCESS;
 }
 
