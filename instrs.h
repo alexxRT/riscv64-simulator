@@ -34,7 +34,7 @@
 
 #define LSET(reg, val) {if (reg) IRCR(Store, val, IRGEP64(regs, reg, #reg "_"));}
 
-#define LPC (IRCR(Load, I64T, pc, "pc"))
+#define LPC pc //IRCR(Load, I64T, pc, "pc"))
 
 #define CODE_BIN_IU(op) DEB((int64_t)REG(RS1) << ' ' << IMM)  SET_REG(RD, REG(RS1) op IMM); DEB(REG(RD));
 #define CODE_BIN_IS(op) SET_REG(RD, ((int64_t)REG(RS1)) op ((int64_t)IMM));

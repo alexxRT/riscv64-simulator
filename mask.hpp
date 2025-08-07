@@ -18,7 +18,7 @@ struct Decode {
     Instruction::executorT exec;
     void (*decod)(Instruction&, instT);
     bool linear;
-    void (*jit)(Instruction &, llvm::IRBuilder<> &, llvm::LLVMContext &, llvm::Value* , 
+    llvm::Value *(*jit)(Instruction &, llvm::IRBuilder<> &, llvm::LLVMContext &, llvm::Value* ,
                 llvm::Value *, llvm::Value *, llvm::Function *fn, llvm::Value *done);
 };
 

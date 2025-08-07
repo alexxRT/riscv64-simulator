@@ -70,7 +70,8 @@ __attribute__((noinline)) void exec_##name(Hart *heart, const Instruction &instr
 };
 
 namespace Jiters {
-void empty_jiter(llvm::IRBuilder<> &builder) {
+void empty_jiter(llvm::IRBuilder<> &builder, Value *new_pc, Value *pc_ptr) {
+    builder.CreateStore(new_pc, pc_ptr);
     builder.CreateRetVoid();
 } // for basic blocks
 
@@ -80,16 +81,12 @@ using llvm::BasicBlock;
 using llvm::Function;
 using llvm::PHINode;
 
-#define EXEC_RET_true
-#define EXEC_RET_false builder.CreateRetVoid();
-
 #define _INSTR_(name, type, code, linear, jit) \
-void jit_##name(Instruction &instr, llvm::IRBuilder<> &builder, llvm::LLVMContext &ctx, Value* regs, Value *mem, Value *pc, Function *fn, Value *done) { \
+Value *jit_##name(Instruction &instr, llvm::IRBuilder<> &builder, llvm::LLVMContext &ctx, Value* regs, Value *mem, Value *pc, Function *fn, Value *done) { \
     DEB("dec " #name); \
-    Value* new_pc = builder.CreateAdd(builder.CreateLoad(Type::getInt64Ty(ctx), pc, "pc"), builder.getInt64(4), "new_pc"); \
+    Value* new_pc = builder.CreateAdd(pc, builder.getInt64(4), "new_pc"); \
     jit  \
-    builder.CreateStore(new_pc, pc); \
-    EXEC_RET_##linear \
+    return new_pc; \
 }
 
 #include "instrs.h"

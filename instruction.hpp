@@ -71,14 +71,14 @@ void exec_##name(Hart *heart, const Instruction &instr);
 };
 
 namespace Jiters {
-void empty_jiter(llvm::IRBuilder<> &builder); // for basic blocks
+void empty_jiter(llvm::IRBuilder<> &builder, llvm::Value *new_pc, llvm::Value *pc_ptr);
 
 using llvm::Type;
 using llvm::Value;
 using llvm::Function;
 
 #define _INSTR_(name, type, code, linear, jit) \
-void jit_##name(Instruction &instr, llvm::IRBuilder<> &builder, llvm::LLVMContext &ctx, Value* regs, Value *mem, Value *pc, Function *fn, Value *done);
+Value *jit_##name(Instruction &instr, llvm::IRBuilder<> &builder, llvm::LLVMContext &ctx, Value* regs, Value *mem, Value *pc, Function *fn, Value *done);
 
 #include "instrs.h"
 #undef _INSTR_

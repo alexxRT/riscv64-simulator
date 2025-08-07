@@ -29,8 +29,11 @@ void RVBasicBlock::init() {
         std::cerr << "Failed to create LLJIT: " << toString(jit.takeError()) << std::endl;
         exit(1);
     }
-    jit_ft = FunctionType::get(Type::getVoidTy(ctx), 
-       {Type::getInt64PtrTy(ctx), Type::getInt8PtrTy(ctx), Type::getInt64PtrTy(ctx), Type::getInt1PtrTy(ctx) }, false);
+    jit_ft =
+        FunctionType::get(Type::getVoidTy(ctx),
+                          {Type::getInt64PtrTy(ctx), Type::getInt8PtrTy(ctx),
+                           Type::getInt64PtrTy(ctx), Type::getInt1PtrTy(ctx)},
+                          false);
 }
 
 size_t RVBasicBlock::construct(const instT *arr) {
@@ -74,8 +77,10 @@ size_t RVBasicBlock::do_jit(const instT *arr) {
     auto args = fn->args().begin();
     Value* regs = &*args++;
     Value* mem = &*args++;
-    Value* pc = &*args++;
+    Value* pc_ptr = &*args++;
     Value* done = &*args;
+
+    Value *pc_val = builder.CreateLoad(Type::getInt64Ty(ctx), pc_ptr, "pc");
 
     int i = 0;
     for (; i < BB_len; i++) {
@@ -90,20 +95,16 @@ size_t RVBasicBlock::do_jit(const instT *arr) {
         auto dec = decoders[fingerprint];
         DEB("decoding..");
         dec.decod(instrs[i], instruction);
-        dec.jit(instrs[i], builder, ctx, regs, mem, pc, fn, done);
+        pc_val = dec.jit(instrs[i], builder, ctx, regs, mem, pc_val, fn, done);
 #ifdef DEBUG
         instrs[i].dump();
 #endif
-        if (!dec.linear) {
-            len = i + 1;
+        if (!dec.linear)
             break;
-        }
     }
-    if (i==BB_len) {
-        DEB("decoded\n");
-        Jiters::empty_jiter(builder);
-        len = BB_len+1;
-    }
+    len = i + 1;
+    Jiters::empty_jiter(builder, pc_val, pc_ptr);
+
 #ifdef DEBUG
     module->print(outs(), nullptr);
 #endif
