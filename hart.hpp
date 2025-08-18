@@ -4,6 +4,7 @@
 #include "instruction.hpp"
 #include "mask.hpp"
 #include "basic_block.hpp"
+#include "jit.hpp"
 
 #include <cstdint>
 #include <array>
@@ -43,18 +44,13 @@ public:
     bool use_jit;
 
     RVBasicBlock *bbs_arr;
+    RVJitBlock *jit_arr;
 
-    Hart(bool use_jit_)
-        : registers({}),
-          pc(0),
-          memory(nullptr),
-          done(false),
-          ins_cnt(0),
-          use_jit(use_jit_),
-          bbs_arr(new RVBasicBlock[BB_arr_mask+1]()){}
+    Hart(bool use_jit_);
 
     ~Hart() {
         delete[] bbs_arr;
+        delete[] jit_arr;
     }
 
     uint64_t get_reg(int ind) {

@@ -3,6 +3,7 @@
 #include "hart.hpp"
 #include "basic_block.hpp"
 #include "elf_reader.hpp"
+#include "jit.hpp"
 
 #include <cstdint>
 #include <vector>
@@ -196,7 +197,7 @@ void run_8q() {
 
 int main() {
     DEB("starting")
-    RVBasicBlock::init();
+    RVJitBlock::init();
     DEB("innited")
     fill_arrays();
     DEB("filled")

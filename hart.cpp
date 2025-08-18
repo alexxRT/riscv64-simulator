@@ -2,6 +2,22 @@
 #include <iostream>
 #include "instruction.hpp"
 #include "basic_block.hpp"
+#include "jit.hpp"
+
+Hart::Hart(bool use_jit_)
+    : registers({}),
+      pc(0),
+      memory(nullptr),
+      done(false),
+      ins_cnt(0),
+      use_jit(use_jit_),
+      jit_arr(nullptr),
+      bbs_arr(nullptr) {
+    if (use_jit)
+        jit_arr = new RVJitBlock[Jit_arr_mask + 1]();
+    else
+        bbs_arr = new RVBasicBlock[BB_arr_mask + 1]();
+}
 
 EXECUTE_STATUS Hart::simulate() {
     EXECUTE_STATUS status = EXECUTE_STATUS::SUCCESS;
@@ -35,7 +51,7 @@ void Hart::bb_run_instr() {
 
 void Hart::jit_run_instr() {
     DEB("execjit");
-    RVBasicBlock &bb = bbs_arr[(pc >> 2) & BB_arr_mask];
+    RVJitBlock &bb = jit_arr[(pc >> 2) & Jit_arr_mask];
     DEB("decoding at pc=" << pc << " bb.addr=" << bb.addr);
     if (bb.addr == pc) {
         DEB("already jitted")
