@@ -5,10 +5,10 @@
 #include "mask.hpp"
 #include <cstdint>
 
-const size_t BB_len = 31;
+const size_t BB_len = 31; // 1 for cosim, 31 is good enough for run
 const size_t BB_arr_mask = (1<<17)-1; // TODO it's 90MB, maybe more?
 
-class BasicBlock {
+class RVBasicBlock {
 public:
     size_t addr;
     Instruction instrs[BB_len+1]; // +1 is reserved for empty
@@ -16,7 +16,5 @@ public:
 
     size_t construct(const instT *arr);
 };
-
-extern BasicBlock bbs_arr[BB_arr_mask+1];
 
 #endif // BB_H

@@ -1,10 +1,8 @@
-#include "basic_block.hpp"
 #include "instruction.hpp"
 #include "hart.hpp"
+#include "basic_block.hpp"
 
-BasicBlock bbs_arr[BB_arr_mask+1] = {};
-
-size_t BasicBlock::construct(const instT *arr) {
+size_t RVBasicBlock::construct(const instT *arr) {
     int i = 0;
     for (; i < BB_len; i++) {
         DEB("bb:" << i);
@@ -18,6 +16,9 @@ size_t BasicBlock::construct(const instT *arr) {
         auto dec = decoders[fingerprint];
         DEB("decoding..");
         dec.decod(instrs[i], instruction);
+#ifdef DEBUG
+        instrs[i].dump();
+#endif
         instrs[i].execute = dec.exec;
         if (!dec.linear) {
             len = i + 1;

@@ -5,6 +5,9 @@
 #include <cstdint>
 #include <iostream>
 #include <functional>
+#include <llvm-16/llvm/IR/Function.h>
+#include <llvm-16/llvm/IR/IRBuilder.h>
+#include <llvm-16/llvm/IR/Value.h>
 #include "encoding.out.h"
 
 #define RD_SHIFT 7
@@ -32,6 +35,10 @@ public:
     Instruction(instT code, executorT execute_) : execute(execute_) {}
     Instruction() {}
 
+    void dump() {
+        std::cout << (int)rs1 << ' ' << (int)rs2 << ' ' << (int)rd << ' ' << (int)imm << '\n';
+    }
+
     instT instr_code;
     regIDT rs1, rs2, rd;
     uint64_t imm;
@@ -55,8 +62,23 @@ namespace Executors {
 void empty_executor(Hart *heart, const Instruction &instr); // for basic blocks
 
 
-#define _INSTR_(name, type, code, linear) \
+#define _INSTR_(name, type, code, linear, jit) \
 void exec_##name(Hart *heart, const Instruction &instr);
+
+#include "instrs.h"
+#undef _INSTR_
+
+};
+
+namespace Jiters {
+void empty_jiter(llvm::IRBuilder<> &builder, llvm::Value *new_pc, llvm::Value *pc_ptr);
+
+using llvm::Type;
+using llvm::Value;
+using llvm::Function;
+
+#define _INSTR_(name, type, code, linear, jit) \
+Value *jit_##name(Instruction &instr, llvm::IRBuilder<> &builder, llvm::LLVMContext &ctx, Value* regs, Value *mem, Value *pc, Function *fn, Value *done);
 
 #include "instrs.h"
 #undef _INSTR_

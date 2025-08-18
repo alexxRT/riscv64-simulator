@@ -4,6 +4,7 @@
 #include "instruction.hpp"
 #include "mask.hpp"
 #include "basic_block.hpp"
+#include "jit.hpp"
 
 #include <cstdint>
 #include <array>
@@ -40,8 +41,17 @@ public:
     std::array<regT, REGISTERS_NUM> registers;
     uint8_t *memory;
     bool done;
+    bool use_jit;
 
-    Hart() : registers({}), pc(0), memory(nullptr), done(false), ins_cnt(0) { }
+    RVBasicBlock *bbs_arr;
+    RVJitBlock *jit_arr;
+
+    Hart(bool use_jit_);
+
+    ~Hart() {
+        delete[] bbs_arr;
+        delete[] jit_arr;
+    }
 
     uint64_t get_reg(int ind) {
         return registers[ind];
@@ -52,6 +62,12 @@ public:
     }
 
     EXECUTE_STATUS simulate();
+
+    void exec_instr();
+
+    void bb_run_instr();
+
+    void jit_run_instr();
 };
 
 #endif //HART_H
